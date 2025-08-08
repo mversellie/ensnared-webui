@@ -7,7 +7,7 @@ export const settingsService = {
   
   async saveSettings(data: any) {
     return apiRequest('/settings', {
-      method: 'POST',
+      method: 'PUT',
       body: JSON.stringify(data),
     });
   }
