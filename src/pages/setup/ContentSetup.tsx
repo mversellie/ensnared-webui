@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { settingsService } from "@/services";
 
 const contentSchema = z.object({
   writersNote: z.string().min(1, "Writers note is required"),
@@ -50,20 +51,8 @@ export const ContentSetup = () => {
 
       console.log("Sending setup data:", setupData);
 
-      // Send to /settings endpoint
-      const response = await fetch('/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(setupData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      // Send to /settings endpoint using settingsService
+      const result = await settingsService.saveSettings(setupData);
       console.log("Setup completed successfully:", result);
 
       toast({
