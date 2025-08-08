@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 const contentSchema = z.object({
   writersNote: z.string().min(1, "Writers note is required"),
@@ -16,6 +18,8 @@ type ContentFormData = z.infer<typeof contentSchema>;
 
 export const ContentSetup = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     register,
@@ -29,22 +33,64 @@ export const ContentSetup = () => {
     },
   });
 
-  const onSubmit = (data: ContentFormData) => {
-    console.log("Content data:", data);
-    // Save to localStorage
-    localStorage.setItem('setup_writersNote', data.writersNote);
-    localStorage.setItem('setup_worldSettings', data.worldSettings);
+  const onSubmit = async (data: ContentFormData) => {
+    setIsSubmitting(true);
     
-    // Clear all setup data after completion
-    localStorage.removeItem('setup_networkTitle');
-    localStorage.removeItem('setup_backendApiUrl');
-    localStorage.removeItem('setup_messengerUrl');
-    localStorage.removeItem('setup_openaiApiUrl');
-    localStorage.removeItem('setup_apiToken');
-    localStorage.removeItem('setup_writersNote');
-    localStorage.removeItem('setup_worldSettings');
-    
-    navigate("/");
+    try {
+      // Collect all setup data from localStorage
+      const setupData = {
+        networkTitle: localStorage.getItem('setup_networkTitle') || '',
+        backendApiUrl: localStorage.getItem('setup_backendApiUrl') || '',
+        messengerUrl: localStorage.getItem('setup_messengerUrl') || '',
+        openaiApiUrl: localStorage.getItem('setup_openaiApiUrl') || '',
+        apiToken: localStorage.getItem('setup_apiToken') || '',
+        writersNote: data.writersNote,
+        worldSettings: data.worldSettings,
+      };
+
+      console.log("Sending setup data:", setupData);
+
+      // Send to /settings endpoint
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(setupData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Setup completed successfully:", result);
+
+      toast({
+        title: "Setup Complete",
+        description: "Your configuration has been saved successfully.",
+      });
+
+      // Clear all setup data after successful submission
+      localStorage.removeItem('setup_networkTitle');
+      localStorage.removeItem('setup_backendApiUrl');
+      localStorage.removeItem('setup_messengerUrl');
+      localStorage.removeItem('setup_openaiApiUrl');
+      localStorage.removeItem('setup_apiToken');
+      localStorage.removeItem('setup_writersNote');
+      localStorage.removeItem('setup_worldSettings');
+
+      navigate("/");
+    } catch (error) {
+      console.error("Error submitting setup:", error);
+      toast({
+        title: "Setup Failed",
+        description: "Failed to save configuration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -103,8 +149,12 @@ export const ContentSetup = () => {
               >
                 Back
               </Button>
-              <Button type="submit" className="flex-1">
-                Complete Setup
+              <Button 
+                type="submit" 
+                className="flex-1"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Saving..." : "Complete Setup"}
               </Button>
             </div>
           </form>
