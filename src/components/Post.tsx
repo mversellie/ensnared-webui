@@ -65,7 +65,6 @@ export const Post = ({ post }: PostProps) => {
               }`}
             >
               <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-              <span>{likesCount}</span>
             </Button>
 
             <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground transition-smooth">

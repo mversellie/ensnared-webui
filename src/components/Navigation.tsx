@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "./CreatePostModal";
 
 const navItems = [
-  { icon: Home, label: "Home", id: "home" },
   { icon: MessageCircle, label: "Messages", id: "messages" },
   { icon: PlusSquare, label: "Create", id: "create" },
   { icon: User, label: "Profile", id: "profile" },
