@@ -11,8 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { settingsService } from "@/services";
 
 const contentSchema = z.object({
-  writersNote: z.string().min(1, "Writers note is required"),
-  worldSettings: z.string().min(1, "World settings are required"),
+  writersNote: z.string().optional(),
+  worldSettings: z.string().optional(),
 });
 
 type ContentFormData = z.infer<typeof contentSchema>;
