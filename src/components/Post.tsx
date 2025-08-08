@@ -3,29 +3,19 @@ import { Heart, MessageCircle, Share, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { PostDTO, UserDTO } from "@/types/api";
 
-interface PostData {
-  id: string;
-  author: {
-    name: string;
-    username: string;
-    avatar: string;
-  };
-  content: string;
-  image?: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-  shares: number;
+interface PostWithAuthor extends PostDTO {
+  author?: UserDTO;
 }
 
 interface PostProps {
-  post: PostData;
+  post: PostWithAuthor;
 }
 
 export const Post = ({ post }: PostProps) => {
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(post.likes);
+  const [likesCount, setLikesCount] = useState(0);
 
   const handleLike = () => {
     if (isLiked) {
@@ -43,12 +33,12 @@ export const Post = ({ post }: PostProps) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={post.author.avatar} alt={post.author.name} />
-              <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+              <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author?.username || post.user_id}`} alt={post.author?.username || 'User'} />
+              <AvatarFallback>{post.author?.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold text-card-foreground">{post.author.name}</h3>
-              <p className="text-sm text-muted-foreground">{post.author.username} • {post.timestamp}</p>
+              <h3 className="font-semibold text-card-foreground">{post.author?.username || 'Unknown User'}</h3>
+              <p className="text-sm text-muted-foreground">@{post.author?.username || 'user'} • {new Date(post.created_at).toLocaleDateString()}</p>
             </div>
           </div>
           <Button variant="ghost" size="sm">
@@ -61,16 +51,7 @@ export const Post = ({ post }: PostProps) => {
           <p className="text-card-foreground leading-relaxed">{post.content}</p>
         </div>
 
-        {/* Post image */}
-        {post.image && (
-          <div className="mb-4 rounded-lg overflow-hidden">
-            <img 
-              src={post.image} 
-              alt="Post content" 
-              className="w-full h-auto object-cover"
-            />
-          </div>
-        )}
+        {/* Post image - placeholder for now since API doesn't include images */}
 
         {/* Engagement actions */}
         <div className="flex items-center justify-between pt-4 border-t border-border">
@@ -89,12 +70,12 @@ export const Post = ({ post }: PostProps) => {
 
             <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground transition-smooth">
               <MessageCircle size={18} />
-              <span>{post.comments}</span>
+              <span>0</span>
             </Button>
 
             <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground transition-smooth">
               <Share size={18} />
-              <span>{post.shares}</span>
+              <span>0</span>
             </Button>
           </div>
         </div>

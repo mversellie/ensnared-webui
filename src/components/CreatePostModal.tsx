@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Image, Smile } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { postService } from "@/services";
 
 interface CreatePostModalProps {
   open: boolean;
@@ -16,21 +18,43 @@ export const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) =>
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // For demo purposes, using a hardcoded user ID
+  // In a real app, this would come from authentication context
+  const currentUserId = "demo-user-1";
+
+  const createPostMutation = useMutation({
+    mutationFn: (postData: { content: string; user_id: string }) => 
+      postService.createPost(postData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast({
+        title: "Post created!",
+        description: "Your post has been shared successfully.",
+      });
+      setContent("");
+      setImageUrl("");
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Error creating post:', error);
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
 
-    // Simulate post creation
-    toast({
-      title: "Post created!",
-      description: "Your post has been shared successfully.",
+    createPostMutation.mutate({
+      content: content.trim(),
+      user_id: currentUserId,
     });
-
-    // Reset form and close modal
-    setContent("");
-    setImageUrl("");
-    onOpenChange(false);
   };
 
   return (
@@ -93,8 +117,11 @@ export const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) =>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!content.trim()}>
-                Post
+              <Button 
+                type="submit" 
+                disabled={!content.trim() || createPostMutation.isPending}
+              >
+                {createPostMutation.isPending ? "Posting..." : "Post"}
               </Button>
             </div>
           </div>
