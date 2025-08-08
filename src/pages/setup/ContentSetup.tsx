@@ -23,11 +23,27 @@ export const ContentSetup = () => {
     formState: { errors },
   } = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
+    defaultValues: {
+      systemPrompt: localStorage.getItem('setup_systemPrompt') || '',
+      worldSettings: localStorage.getItem('setup_worldSettings') || '',
+    },
   });
 
   const onSubmit = (data: ContentFormData) => {
     console.log("Content data:", data);
-    // TODO: Save to storage/API and complete setup
+    // Save to localStorage
+    localStorage.setItem('setup_systemPrompt', data.systemPrompt);
+    localStorage.setItem('setup_worldSettings', data.worldSettings);
+    
+    // Clear all setup data after completion
+    localStorage.removeItem('setup_networkTitle');
+    localStorage.removeItem('setup_backendApiUrl');
+    localStorage.removeItem('setup_messengerUrl');
+    localStorage.removeItem('setup_openaiApiUrl');
+    localStorage.removeItem('setup_apiToken');
+    localStorage.removeItem('setup_systemPrompt');
+    localStorage.removeItem('setup_worldSettings');
+    
     navigate("/");
   };
 

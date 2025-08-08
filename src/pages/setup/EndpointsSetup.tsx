@@ -27,11 +27,21 @@ export const EndpointsSetup = () => {
     formState: { errors },
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
+    defaultValues: {
+      backendApiUrl: localStorage.getItem('setup_backendApiUrl') || '',
+      messengerUrl: localStorage.getItem('setup_messengerUrl') || '',
+      openaiApiUrl: localStorage.getItem('setup_openaiApiUrl') || '',
+      apiToken: localStorage.getItem('setup_apiToken') || '',
+    },
   });
 
   const onSubmit = (data: EndpointsFormData) => {
     console.log("Endpoints data:", data);
-    // TODO: Save to storage/API
+    // Save to localStorage
+    localStorage.setItem('setup_backendApiUrl', data.backendApiUrl);
+    localStorage.setItem('setup_messengerUrl', data.messengerUrl);
+    localStorage.setItem('setup_openaiApiUrl', data.openaiApiUrl);
+    if (data.apiToken) localStorage.setItem('setup_apiToken', data.apiToken);
     navigate("/setup/content");
   };
 

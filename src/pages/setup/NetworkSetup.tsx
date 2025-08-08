@@ -22,11 +22,15 @@ export const NetworkSetup = () => {
     formState: { errors },
   } = useForm<NetworkFormData>({
     resolver: zodResolver(networkSchema),
+    defaultValues: {
+      networkTitle: localStorage.getItem('setup_networkTitle') || '',
+    },
   });
 
   const onSubmit = (data: NetworkFormData) => {
     console.log("Network data:", data);
-    // TODO: Save to storage/API
+    // Save to localStorage
+    localStorage.setItem('setup_networkTitle', data.networkTitle);
     navigate("/setup/endpoints");
   };
 
