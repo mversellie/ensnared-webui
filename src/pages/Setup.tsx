@@ -6,13 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload } from "lucide-react";
 
 const setupSchema = z.object({
   networkTitle: z.string().min(1, "Network title is required"),
-  username: z.string().min(1, "Username is required"),
-  avatar: z.instanceof(FileList).optional(),
   // System endpoints
   backendApiUrl: z.string().url("Please enter a valid Backend API URL"),
   messengerUrl: z.string().url("Please enter a valid Messenger URL"),
@@ -24,29 +20,13 @@ const setupSchema = z.object({
 type SetupFormData = z.infer<typeof setupSchema>;
 
 export const Setup = () => {
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<SetupFormData>({
     resolver: zodResolver(setupSchema),
   });
-
-  const avatarFiles = watch("avatar");
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatarPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const onSubmit = (data: SetupFormData) => {
     console.log("Setup data:", data);
@@ -77,44 +57,6 @@ export const Setup = () => {
               {errors.networkTitle && (
                 <p className="text-sm text-destructive">{errors.networkTitle.message}</p>
               )}
-            </div>
-
-            {/* Username */}
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                placeholder="admin"
-                {...register("username")}
-              />
-              {errors.username && (
-                <p className="text-sm text-destructive">{errors.username.message}</p>
-              )}
-            </div>
-
-            {/* Avatar Upload */}
-            <div className="space-y-4">
-              <Label>Avatar</Label>
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={avatarPreview || undefined} />
-                  <AvatarFallback className="bg-muted">
-                    <Upload size={24} className="text-muted-foreground" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    {...register("avatar")}
-                    onChange={handleAvatarChange}
-                    className="cursor-pointer"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Upload an image for your profile
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* Endpoints Section */}
