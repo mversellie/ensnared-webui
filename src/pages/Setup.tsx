@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const setupSchema = z.object({
   networkTitle: z.string().min(1, "Network title is required"),
@@ -15,6 +16,9 @@ const setupSchema = z.object({
   // LLM endpoints
   openaiApiUrl: z.string().url("Please enter a valid OpenAI API URL"),
   apiToken: z.string().optional(),
+  // Content Configuration
+  systemPrompt: z.string().min(1, "System prompt is required"),
+  worldSettings: z.string().min(1, "World settings are required"),
 });
 
 type SetupFormData = z.infer<typeof setupSchema>;
@@ -126,8 +130,47 @@ export const Setup = () => {
               </div>
             </div>
 
+            {/* Content Configuration Section */}
+            <div className="space-y-6 pt-4 border-t">
+              <h3 className="text-lg font-semibold">Content Configuration</h3>
+              
+              {/* System Prompt */}
+              <div className="space-y-2">
+                <Label htmlFor="systemPrompt">System Prompt</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  A system prompt defines the behavior and personality of the AI. It tells the LLM how to respond, what role to play, and what guidelines to follow in conversations.
+                </p>
+                <Textarea
+                  id="systemPrompt"
+                  placeholder="You are a helpful assistant that..."
+                  className="min-h-[100px]"
+                  {...register("systemPrompt")}
+                />
+                {errors.systemPrompt && (
+                  <p className="text-sm text-destructive">{errors.systemPrompt.message}</p>
+                )}
+              </div>
+
+              {/* World Settings */}
+              <div className="space-y-2">
+                <Label htmlFor="worldSettings">World Settings</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Describe the world or environment for your network. This sets the context and atmosphere for interactions.
+                </p>
+                <Textarea
+                  id="worldSettings"
+                  placeholder="A magical realm where dragons soar through crystal skies and ancient wizards study in towering spires. The land is filled with mystical creatures, enchanted forests, and powerful artifacts waiting to be discovered..."
+                  className="min-h-[120px]"
+                  {...register("worldSettings")}
+                />
+                {errors.worldSettings && (
+                  <p className="text-sm text-destructive">{errors.worldSettings.message}</p>
+                )}
+              </div>
+            </div>
+
             <Button type="submit" className="w-full" size="lg">
-              Continue Setup
+              Complete Setup
             </Button>
           </form>
         </CardContent>
