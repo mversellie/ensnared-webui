@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { settingsService } from "@/services/settingsService";
+import { useToast } from "@/hooks/use-toast";
 
 const settingsSchema = z.object({
   networkTitle: z.string().min(1, "Network title is required"),
@@ -24,17 +26,52 @@ const settingsSchema = z.object({
 type SettingsFormData = z.infer<typeof settingsSchema>;
 
 export const Settings = () => {
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
   });
 
-  const onSubmit = (data: SettingsFormData) => {
-    console.log("Settings data:", data);
-    // TODO: Submit to API
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        setLoading(true);
+        const settings = await settingsService.getSettings();
+        reset(settings);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load settings",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, [reset, toast]);
+
+  const onSubmit = async (data: SettingsFormData) => {
+    try {
+      await settingsService.saveSettings(data);
+      toast({
+        title: "Success",
+        description: "Settings saved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save settings",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -169,8 +206,8 @@ export const Settings = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" size="lg">
-              Save Settings
+            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              {loading ? "Loading..." : "Save Settings"}
             </Button>
           </form>
         </CardContent>
