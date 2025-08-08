@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Home, MessageCircle, PlusSquare, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "./CreatePostModal";
+import { ApiEndpointWidget } from "./ApiEndpointWidget";
 
 const navItems = [
   { icon: MessageCircle, label: "Messages", id: "messages" },
@@ -49,6 +50,7 @@ export const Navigation = ({ onNavigate, activeSection = "home" }: NavigationPro
             </div>
             
             <div className="flex items-center gap-2">
+              <ApiEndpointWidget />
               {navItems.map(({ icon: Icon, label, id, href }) => (
                 <Button
                   key={id}
