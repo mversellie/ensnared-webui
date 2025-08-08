@@ -1,11 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { Navigation } from "@/components/Navigation";
 import { Feed } from "@/components/Feed";
 import { Messages } from "@/components/Messages";
+import { settingsService } from "@/services";
+import Setup from "./Setup";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
+  const [needsSetup, setNeedsSetup] = useState(false);
+
+  const { error } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => settingsService.getSettings(),
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (error && 'status' in error && error.status === 404) {
+      setNeedsSetup(true);
+    }
+  }, [error]);
+
+  if (needsSetup) {
+    return <Setup />;
+  }
 
   const renderContent = () => {
     switch (activeSection) {
