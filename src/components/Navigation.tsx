@@ -7,7 +7,7 @@ const navItems = [
   { icon: MessageCircle, label: "Messages", id: "messages" },
   { icon: PlusSquare, label: "Create", id: "create" },
   { icon: User, label: "Profile", id: "profile" },
-  { icon: Settings, label: "Settings", id: "settings", href: "/setup" },
+  { icon: Settings, label: "Settings", id: "settings", href: "/settings" },
 ];
 
 interface NavigationProps {
