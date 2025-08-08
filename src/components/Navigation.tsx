@@ -1,0 +1,62 @@
+import { useState } from "react";
+import { Home, MessageCircle, PlusSquare, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CreatePostModal } from "./CreatePostModal";
+
+const navItems = [
+  { icon: Home, label: "Home", id: "home" },
+  { icon: MessageCircle, label: "Messages", id: "messages" },
+  { icon: PlusSquare, label: "Create", id: "create" },
+  { icon: User, label: "Profile", id: "profile" },
+];
+
+interface NavigationProps {
+  onNavigate?: (section: string) => void;
+  activeSection?: string;
+}
+
+export const Navigation = ({ onNavigate, activeSection = "home" }: NavigationProps) => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const handleNavClick = (id: string) => {
+    if (id === "create") {
+      setIsCreateModalOpen(true);
+    } else {
+      onNavigate?.(id);
+    }
+  };
+
+  return (
+    <>
+      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border shadow-soft">
+        <div className="container mx-auto px-4 py-3 max-w-4xl">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              SocialFlow
+            </h1>
+            
+            <div className="flex items-center gap-2">
+              {navItems.map(({ icon: Icon, label, id }) => (
+                <Button
+                  key={id}
+                  variant={activeSection === id ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => handleNavClick(id)}
+                  className="flex items-center gap-2 transition-smooth"
+                >
+                  <Icon size={18} />
+                  <span className="hidden sm:inline">{label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+      
+      <CreatePostModal 
+        open={isCreateModalOpen} 
+        onOpenChange={setIsCreateModalOpen} 
+      />
+    </>
+  );
+};
