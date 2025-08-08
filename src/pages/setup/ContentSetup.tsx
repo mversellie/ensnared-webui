@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const contentSchema = z.object({
-  systemPrompt: z.string().min(1, "System prompt is required"),
+  writersNote: z.string().min(1, "Writers note is required"),
   worldSettings: z.string().min(1, "World settings are required"),
 });
 
@@ -24,7 +24,7 @@ export const ContentSetup = () => {
   } = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
     defaultValues: {
-      systemPrompt: localStorage.getItem('setup_systemPrompt') || '',
+      writersNote: localStorage.getItem('setup_writersNote') || '',
       worldSettings: localStorage.getItem('setup_worldSettings') || '',
     },
   });
@@ -32,7 +32,7 @@ export const ContentSetup = () => {
   const onSubmit = (data: ContentFormData) => {
     console.log("Content data:", data);
     // Save to localStorage
-    localStorage.setItem('setup_systemPrompt', data.systemPrompt);
+    localStorage.setItem('setup_writersNote', data.writersNote);
     localStorage.setItem('setup_worldSettings', data.worldSettings);
     
     // Clear all setup data after completion
@@ -41,7 +41,7 @@ export const ContentSetup = () => {
     localStorage.removeItem('setup_messengerUrl');
     localStorage.removeItem('setup_openaiApiUrl');
     localStorage.removeItem('setup_apiToken');
-    localStorage.removeItem('setup_systemPrompt');
+    localStorage.removeItem('setup_writersNote');
     localStorage.removeItem('setup_worldSettings');
     
     navigate("/");
@@ -60,20 +60,20 @@ export const ContentSetup = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* System Prompt */}
+            {/* Writers Note */}
             <div className="space-y-2">
-              <Label htmlFor="systemPrompt">System Prompt</Label>
+              <Label htmlFor="writersNote">Writers Note</Label>
               <p className="text-xs text-muted-foreground mb-2">
-                A system prompt defines the behavior and personality of the AI. It tells the LLM how to respond, what role to play, and what guidelines to follow in conversations.
+                A writers note provides context and instructions to the LLM about the setting, tone, style, and any special considerations for generating content. It helps guide the AI to produce more consistent and appropriate responses for your world.
               </p>
               <Textarea
-                id="systemPrompt"
-                placeholder="You are a helpful assistant that..."
+                id="writersNote"
+                placeholder="The story takes place in a medieval fantasy setting. Characters should speak formally and reference magic as commonplace..."
                 className="min-h-[100px]"
-                {...register("systemPrompt")}
+                {...register("writersNote")}
               />
-              {errors.systemPrompt && (
-                <p className="text-sm text-destructive">{errors.systemPrompt.message}</p>
+              {errors.writersNote && (
+                <p className="text-sm text-destructive">{errors.writersNote.message}</p>
               )}
             </div>
 
