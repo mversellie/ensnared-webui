@@ -18,14 +18,14 @@ export const Feed = () => {
     queryFn: () => userService.getUsers(),
   });
 
-  // Transform API data to match Post component interface
+  // Transform API data to match Post component interface and sort by date descending
   const posts: PostWithAuthor[] = postsData?.posts?.map(post => {
     const author = usersData?.users?.find(user => user.id === post.user_id);
     return {
       ...post,
       author,
     };
-  }) || [];
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
 
   if (error) {
     return (
