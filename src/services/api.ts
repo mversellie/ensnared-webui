@@ -20,8 +20,13 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${getApiBaseUrl()}${endpoint}`;
-  
+  // Normalize URL: avoid duplicate slashes and trailing slash before query params
+  const base = getApiBaseUrl().replace(/\/+$/, '');
+  const [rawPath = '', query] = endpoint.split('?');
+  // Ensure single leading slash; keep trailing slash only when no query string
+  const path = `/${rawPath.replace(/^\/+/, '')}`;
+  const url = query ? `${base}${path.replace(/\/+$/, '')}?${query}` : `${base}${path}`;
+
   const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
