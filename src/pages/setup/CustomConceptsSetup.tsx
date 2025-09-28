@@ -34,13 +34,18 @@ export const CustomConceptsSetup = () => {
     if (trimmed && !customConcepts.some(c => c.name.toLowerCase() === trimmed.toLowerCase())) {
       setIsModalOpen(true);
     }
-    setConceptName("");
   };
 
   const handleSaveConcept = (concept: CustomConcept) => {
     const updatedConcepts = [...customConcepts, concept];
     setCustomConcepts(updatedConcepts);
     localStorage.setItem('setup_customConcepts', JSON.stringify(updatedConcepts));
+    setConceptName(""); // Clear input after saving
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setConceptName(""); // Clear input when modal closes
   };
 
   const removeConcept = (index: number) => {
@@ -191,7 +196,7 @@ export const CustomConceptsSetup = () => {
 
       <CustomConceptModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose}
         onSave={handleSaveConcept}
         initialName={conceptName}
       />
