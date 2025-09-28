@@ -70,7 +70,7 @@ export const ContentSetup = () => {
             Content Configuration
           </CardTitle>
           <p className="text-muted-foreground">
-            Step 3 of 4: AI and World Settings
+            Step 3 of 5: AI and World Settings
           </p>
         </CardHeader>
         <CardContent>

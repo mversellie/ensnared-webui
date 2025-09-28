@@ -53,7 +53,7 @@ export const EndpointsSetup = () => {
             Configure Endpoints
           </CardTitle>
           <p className="text-muted-foreground">
-            Step 2 of 4: System and API Configuration
+            Step 2 of 5: System and API Configuration
           </p>
         </CardHeader>
         <CardContent>

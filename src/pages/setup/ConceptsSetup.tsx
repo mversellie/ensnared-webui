@@ -32,57 +32,12 @@ export const ConceptsSetup = () => {
     },
   });
 
-  const onSubmit = async (data: ConceptsFormData) => {
-    setIsSubmitting(true);
+  const onSubmit = (data: ConceptsFormData) => {
+    // Save concepts to localStorage
+    localStorage.setItem('setup_concepts', JSON.stringify(data.concepts));
     
-    try {
-      // Save concepts to localStorage
-      localStorage.setItem('setup_concepts', JSON.stringify(data.concepts));
-
-      // Collect all setup data from localStorage
-      const setupData = {
-        networkTitle: localStorage.getItem('setup_networkTitle') || '',
-        backendApiUrl: localStorage.getItem('setup_backendApiUrl') || '',
-        messengerUrl: localStorage.getItem('setup_messengerUrl') || '',
-        openaiApiUrl: localStorage.getItem('setup_openaiApiUrl') || '',
-        apiToken: localStorage.getItem('setup_apiToken') || '',
-        writersNote: localStorage.getItem('setup_writersNote') || '',
-        worldSettings: localStorage.getItem('setup_worldSettings') || '',
-        concepts: data.concepts,
-      };
-
-      console.log("Sending setup data:", setupData);
-
-      // Send to /settings endpoint using settingsService
-      const result = await settingsService.saveSettings(setupData);
-      console.log("Setup completed successfully:", result);
-
-      toast({
-        title: "Setup Complete",
-        description: "Your configuration has been saved successfully.",
-      });
-
-      // Clear all setup data after successful submission
-      localStorage.removeItem('setup_networkTitle');
-      localStorage.removeItem('setup_backendApiUrl');
-      localStorage.removeItem('setup_messengerUrl');
-      localStorage.removeItem('setup_openaiApiUrl');
-      localStorage.removeItem('setup_apiToken');
-      localStorage.removeItem('setup_writersNote');
-      localStorage.removeItem('setup_worldSettings');
-      localStorage.removeItem('setup_concepts');
-
-      navigate("/");
-    } catch (error) {
-      console.error("Error submitting setup:", error);
-      toast({
-        title: "Setup Failed",
-        description: "Failed to save configuration. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Navigate to custom concepts step
+    navigate("/setup/custom-concepts");
   };
 
   return (
@@ -93,7 +48,7 @@ export const ConceptsSetup = () => {
             Define Concepts
           </CardTitle>
           <p className="text-muted-foreground">
-            Step 4 of 4: Concepts
+            Step 4 of 5: Concepts
           </p>
         </CardHeader>
         <CardContent>
@@ -135,9 +90,8 @@ export const ConceptsSetup = () => {
               <Button 
                 type="submit" 
                 className="flex-1"
-                disabled={isSubmitting}
               >
-                {isSubmitting ? "Saving..." : "Complete Setup"}
+                Next: Custom Concepts
               </Button>
             </div>
           </form>

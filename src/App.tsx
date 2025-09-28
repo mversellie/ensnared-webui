@@ -9,6 +9,7 @@ import NetworkSetup from "./pages/setup/NetworkSetup";
 import EndpointsSetup from "./pages/setup/EndpointsSetup";
 import ContentSetup from "./pages/setup/ContentSetup";
 import ConceptsSetup from "./pages/setup/ConceptsSetup";
+import CustomConceptsSetup from "./pages/setup/CustomConceptsSetup";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/setup/endpoints" element={<EndpointsSetup />} />
           <Route path="/setup/content" element={<ContentSetup />} />
           <Route path="/setup/concepts" element={<ConceptsSetup />} />
+          <Route path="/setup/custom-concepts" element={<CustomConceptsSetup />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
