@@ -24,6 +24,9 @@ export const CustomConceptsSetup = () => {
   const [customConcepts, setCustomConcepts] = useState<CustomConcept[]>(
     JSON.parse(localStorage.getItem('setup_customConcepts') || '[]')
   );
+  const [previousConcepts] = useState<string[]>(
+    JSON.parse(localStorage.getItem('setup_concepts') || '[]')
+  );
 
   const handleConceptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +101,11 @@ export const CustomConceptsSetup = () => {
     }
   };
 
+  // Filter previous concepts to exclude already defined custom concepts
+  const availableSuggestions = previousConcepts.filter(
+    concept => !customConcepts.some(c => c.name.toLowerCase() === concept.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
@@ -118,12 +126,20 @@ export const CustomConceptsSetup = () => {
                 Custom concepts help generate more personalized content for your social network.
               </p>
               <form onSubmit={handleConceptSubmit} className="flex gap-2">
-                <Input
-                  id="conceptName"
-                  value={conceptName}
-                  onChange={(e) => setConceptName(e.target.value)}
-                  placeholder="e.g., Quantum Computing"
-                />
+                <div className="flex-1">
+                  <Input
+                    id="conceptName"
+                    list="concept-suggestions"
+                    value={conceptName}
+                    onChange={(e) => setConceptName(e.target.value)}
+                    placeholder="e.g., Quantum Computing"
+                  />
+                  <datalist id="concept-suggestions">
+                    {availableSuggestions.map((concept, index) => (
+                      <option key={index} value={concept} />
+                    ))}
+                  </datalist>
+                </div>
                 <Button type="submit" size="sm" disabled={!conceptName.trim()}>
                   <Plus className="h-4 w-4" />
                 </Button>
