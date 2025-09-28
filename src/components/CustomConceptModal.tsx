@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -45,6 +45,16 @@ export const CustomConceptModal = ({
       definition: "",
     },
   });
+
+  // Update form when modal opens or initialName changes
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        name: initialName,
+        definition: "",
+      });
+    }
+  }, [isOpen, initialName, reset]);
 
   const onSubmit = (data: ConceptFormData) => {
     onSave({ name: data.name, definition: data.definition });
