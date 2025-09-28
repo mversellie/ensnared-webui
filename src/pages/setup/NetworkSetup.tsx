@@ -42,7 +42,7 @@ export const NetworkSetup = () => {
             Setup Your Network
           </CardTitle>
           <p className="text-muted-foreground">
-            Step 1 of 3: Basic Information
+            Step 1 of 4: Basic Information
           </p>
         </CardHeader>
         <CardContent>

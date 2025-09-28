@@ -38,43 +38,23 @@ export const ContentSetup = () => {
     setIsSubmitting(true);
     
     try {
-      // Collect all setup data from localStorage
-      const setupData = {
-        networkTitle: localStorage.getItem('setup_networkTitle') || '',
-        backendApiUrl: localStorage.getItem('setup_backendApiUrl') || '',
-        messengerUrl: localStorage.getItem('setup_messengerUrl') || '',
-        openaiApiUrl: localStorage.getItem('setup_openaiApiUrl') || '',
-        apiToken: localStorage.getItem('setup_apiToken') || '',
-        writersNote: data.writersNote,
-        worldSettings: data.worldSettings,
-      };
+      // Save content data to localStorage
+      localStorage.setItem('setup_writersNote', data.writersNote || '');
+      localStorage.setItem('setup_worldSettings', data.worldSettings || '');
 
-      console.log("Sending setup data:", setupData);
-
-      // Send to /settings endpoint using settingsService
-      const result = await settingsService.saveSettings(setupData);
-      console.log("Setup completed successfully:", result);
+      console.log("Content data saved, proceeding to concepts step");
 
       toast({
-        title: "Setup Complete",
-        description: "Your configuration has been saved successfully.",
+        title: "Content Saved",
+        description: "Moving to the final step.",
       });
 
-      // Clear all setup data after successful submission
-      localStorage.removeItem('setup_networkTitle');
-      localStorage.removeItem('setup_backendApiUrl');
-      localStorage.removeItem('setup_messengerUrl');
-      localStorage.removeItem('setup_openaiApiUrl');
-      localStorage.removeItem('setup_apiToken');
-      localStorage.removeItem('setup_writersNote');
-      localStorage.removeItem('setup_worldSettings');
-
-      navigate("/");
+      navigate("/setup/concepts");
     } catch (error) {
-      console.error("Error submitting setup:", error);
+      console.error("Error saving content:", error);
       toast({
-        title: "Setup Failed",
-        description: "Failed to save configuration. Please try again.",
+        title: "Save Failed",
+        description: "Failed to save content data. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -90,7 +70,7 @@ export const ContentSetup = () => {
             Content Configuration
           </CardTitle>
           <p className="text-muted-foreground">
-            Step 3 of 3: AI and World Settings
+            Step 3 of 4: AI and World Settings
           </p>
         </CardHeader>
         <CardContent>
@@ -143,7 +123,7 @@ export const ContentSetup = () => {
                 className="flex-1"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Saving..." : "Complete Setup"}
+                {isSubmitting ? "Next: Concepts" : "Next: Concepts"}
               </Button>
             </div>
           </form>
