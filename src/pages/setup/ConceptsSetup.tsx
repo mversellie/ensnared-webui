@@ -93,7 +93,7 @@ export const ConceptsSetup = () => {
             Define Concepts
           </CardTitle>
           <p className="text-muted-foreground">
-            Step 4 of 4: Key Terms and Concepts
+            Step 4 of 4: Concepts
           </p>
         </CardHeader>
         <CardContent>
@@ -102,7 +102,10 @@ export const ConceptsSetup = () => {
             <div className="space-y-2">
               <Label htmlFor="concepts">Key Concepts</Label>
               <p className="text-xs text-muted-foreground mb-3">
-                Enter important terms, concepts, or keywords that define your network's domain. These help the AI understand your context better.
+               Your social network relies on concepts to generate people, locations and posts.  
+                Some have already been populated from your system prompt and world data.
+                Please enter additional concepts which you would like to see in your social network below.  
+                You can also define custom concepts on the next page.  
               </p>
               <Controller
                 name="concepts"
