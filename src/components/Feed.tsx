@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Post } from "./Post";
 import { postService, userService } from "@/services";
 import { PostDTO, UserDTO } from "@/types/api";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface PostWithAuthor extends PostDTO {
   author?: UserDTO;
@@ -26,15 +28,6 @@ export const Feed = () => {
       author,
     };
   }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
-
-  if (error) {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl font-bold mb-4 text-destructive">Error Loading Posts</h2>
-        <p className="text-muted-foreground">Failed to load posts. Please try again later.</p>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -61,6 +54,15 @@ export const Feed = () => {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error Loading Posts</AlertTitle>
+          <AlertDescription>
+            Failed to load posts. Please try again later.
+          </AlertDescription>
+        </Alert>
+      )}
       {posts.length === 0 ? (
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold mb-4">No Posts Yet</h2>
