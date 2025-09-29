@@ -39,7 +39,7 @@ export const Navigation = ({ onNavigate, activeSection = "home" }: NavigationPro
                 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-smooth"
                 onClick={() => onNavigate?.("home")}
               >
-                SocialFlow
+                Ensnare
               </h1>
               <a 
                 href="/setup" 
