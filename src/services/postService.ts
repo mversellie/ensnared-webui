@@ -31,4 +31,8 @@ export const postService = {
   async getPostComments(postId: string): Promise<PostListResponse> {
     return apiRequest<PostListResponse>(`/posts/${postId}/comments`);
   },
+
+  async getFeed(userId: string): Promise<PostListResponse> {
+    return apiRequest<PostListResponse>(`/feed/${userId}`);
+  },
 };

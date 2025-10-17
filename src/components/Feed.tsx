@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { Post } from "./Post";
 import { postService, userService } from "@/services";
 import { PostDTO, UserDTO } from "@/types/api";
@@ -10,9 +11,13 @@ interface PostWithAuthor extends PostDTO {
 }
 
 export const Feed = () => {
+  const [searchParams] = useSearchParams();
+  const userId = searchParams.get('user_id');
+
   const { data: postsData, isLoading, error } = useQuery({
-    queryKey: ['posts'],
-    queryFn: () => postService.getPosts(),
+    queryKey: ['feed', userId],
+    queryFn: () => userId ? postService.getFeed(userId) : postService.getPosts(),
+    enabled: !!userId,
   });
 
   const { data: usersData } = useQuery({
