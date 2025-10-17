@@ -10,6 +10,7 @@ export interface PostDTO {
   content: string;
   created_at: string;
   user_id: string;
+  username: string;
   is_comment: boolean;
   parent_id?: string;
   concepts: string[];
@@ -28,6 +29,7 @@ export interface DirectMessageDTO {
   created_at: string;
   sender_id: string;
   receiver_id: string;
+  username: string;
 }
 
 // Request DTOs

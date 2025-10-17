@@ -1,14 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { Post } from "./Post";
-import { postService, userService } from "@/services";
-import { PostDTO, UserDTO } from "@/types/api";
+import { postService } from "@/services";
+import { PostDTO } from "@/types/api";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-
-interface PostWithAuthor extends PostDTO {
-  author?: UserDTO;
-}
 
 export const Feed = () => {
   const [searchParams] = useSearchParams();
@@ -20,19 +16,10 @@ export const Feed = () => {
     enabled: !!userId,
   });
 
-  const { data: usersData } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => userService.getUsers(),
-  });
-
-  // Transform API data to match Post component interface and sort by date descending
-  const posts: PostWithAuthor[] = postsData?.posts?.map(post => {
-    const author = usersData?.users?.find(user => user.id === post.user_id);
-    return {
-      ...post,
-      author,
-    };
-  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
+  // Sort posts by date descending
+  const posts: PostDTO[] = postsData?.posts?.sort((a, b) => 
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  ) || [];
 
   if (isLoading) {
     return (
