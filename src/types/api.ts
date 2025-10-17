@@ -12,6 +12,7 @@ export interface PostDTO {
   user_id: string;
   is_comment: boolean;
   parent_id?: string;
+  concepts: string[];
 }
 
 export interface FriendshipDTO {
