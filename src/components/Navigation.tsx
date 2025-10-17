@@ -5,7 +5,6 @@ import { CreatePostModal } from "./CreatePostModal";
 import { ApiEndpointWidget } from "./ApiEndpointWidget";
 
 const navItems = [
-  { icon: MessageCircle, label: "Messages", id: "messages" },
   { icon: PlusSquare, label: "Create", id: "create" },
   { icon: User, label: "Profile", id: "profile" },
   { icon: Settings, label: "Settings", id: "settings", href: "/settings" },
