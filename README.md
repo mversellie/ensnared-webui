@@ -6,7 +6,7 @@ Ensnared can be found [Here](https://github.com/mversellie/ensnared)
 
 # Setup For Development
 ## Step 1: Clone the repository using the project's Git URL.
-git clone (https://github.com/mversellie/ensnared-webui.git)
+git clone https://github.com/mversellie/ensnared-webui.git
 
 ## Step 2: Navigate to the project directory.
 cd ensnared-webui
