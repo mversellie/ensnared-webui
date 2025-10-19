@@ -1,6 +1,6 @@
 # Ensnared-Webui
 
-This is an AI Webui used to access the Ensnared API. When Ensnared is ran for the first time, it will pull this webui build it and serve it. 
+This is an AI Generated Webui used to access the Ensnared API. When Ensnared is ran for the first time, it will pull this webui, build it and serve it. 
 
 Ensnared can be found [Here](https://github.com/mversellie/ensnared) 
 
