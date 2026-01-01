@@ -47,11 +47,11 @@ export const ContentSetup = () => {
       try {
         const response = await apiRequest<PromptTemplate[]>('/configuration/prompts/batch_get', {
           method: 'POST',
-          body: JSON.stringify({ templateNames: ['world_prompts', 'authors_note'] }),
+          body: JSON.stringify({ templateNames: ['world', 'authors_note'] }),
         });
 
         const authorsNote = response.find(p => p.template_name === 'authors_note');
-        const worldPrompts = response.find(p => p.template_name === 'world_prompts');
+        const worldPrompts = response.find(p => p.template_name === 'world');
 
         reset({
           writersNote: authorsNote?.template || localStorage.getItem('setup_writersNote') || '',
