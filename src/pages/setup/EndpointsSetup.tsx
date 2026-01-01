@@ -137,7 +137,7 @@ export const EndpointsSetup = () => {
         body: JSON.stringify({
           base_url: values.llmBaseUrl || DEFAULTS.llmBaseUrl,
           model: values.llmModel || DEFAULTS.llmModel,
-          api_key: values.llmApiKey || null,
+          api_key: values.llmApiKey && values.llmApiKey.trim() !== '' ? values.llmApiKey : null,
         }),
       });
       toast({
