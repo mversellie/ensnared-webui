@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,15 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { settingsService } from "@/services";
+import { useToast } from "@/hooks/use-toast";
 
 const networkSchema = z.object({
-  networkTitle: z.string().min(1, "Network title is required"),
+  networkTitle: z.string().min(1, "Network title is required").max(100, "Network title must be less than 100 characters"),
 });
 
 type NetworkFormData = z.infer<typeof networkSchema>;
 
 export const NetworkSetup = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     register,
@@ -23,15 +28,27 @@ export const NetworkSetup = () => {
   } = useForm<NetworkFormData>({
     resolver: zodResolver(networkSchema),
     defaultValues: {
-      networkTitle: localStorage.getItem('setup_networkTitle') || '',
+      networkTitle: settingsService.getCachedSettings()?.networkTitle || '',
     },
   });
 
-  const onSubmit = (data: NetworkFormData) => {
-    console.log("Network data:", data);
-    // Save to localStorage
-    localStorage.setItem('setup_networkTitle', data.networkTitle);
-    navigate("/setup/endpoints");
+  const onSubmit = async (data: NetworkFormData) => {
+    setIsSubmitting(true);
+    try {
+      await settingsService.saveSettings({
+        networkTitle: data.networkTitle,
+        setupStatus: "Named",
+      });
+      navigate("/setup/endpoints");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save settings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -69,8 +86,8 @@ export const NetworkSetup = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1">
-                Next: Endpoints
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Next: Endpoints"}
               </Button>
             </div>
           </form>
