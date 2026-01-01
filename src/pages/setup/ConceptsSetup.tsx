@@ -51,7 +51,7 @@ export const ConceptsSetup = () => {
   useEffect(() => {
     const fetchConcepts = async () => {
       try {
-        const response = await apiRequest<ConceptListResponse>('/concepts/generate');
+        const response = await apiRequest<ConceptListResponse>('/conceptuals/generate');
         const conceptNames = response.concepts
           .map(c => c.name)
           .filter((name): name is string => name !== null && name !== undefined);
