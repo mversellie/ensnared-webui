@@ -53,10 +53,9 @@ export const ContentSetup = () => {
         console.log('Prompts response:', response);
 
         // Handle both array and object with templates property
-        const templates = response.templates;
 
-        const authorsNote = templates?.find(p => p.templateName === 'authors_note');
-        const worldPrompts = templates?.find(p => p.templateName === 'world');
+        const authorsNote = response["authors_note"];
+        const worldPrompts = response["world"];
 
         reset({
           writersNote: authorsNote?.template || localStorage.getItem('setup_writersNote') || '',
