@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -42,13 +42,22 @@ const DEFAULTS = {
 
 type EndpointsFormData = z.infer<typeof endpointsSchema>;
 
+type TestStatus = 'untested' | 'passing' | 'failing';
+
 export const EndpointsSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTestingOpenSearch, setIsTestingOpenSearch] = useState(false);
-  const [isTestingRabbit, setIsTestingRabbit] = useState(false);
-  const [isTestingLlm, setIsTestingLlm] = useState(false);
+  
+  // Track test status and last tested values for each section
+  const [rabbitStatus, setRabbitStatus] = useState<TestStatus>('untested');
+  const [openSearchStatus, setOpenSearchStatus] = useState<TestStatus>('untested');
+  const [llmStatus, setLlmStatus] = useState<TestStatus>('untested');
+  
+  const lastTestedRabbit = useRef<string>('');
+  const lastTestedOpenSearch = useRef<string>('');
+  const lastTestedLlm = useRef<string>('');
+  
   const cachedSettings = settingsService.getCachedSettings();
   
   const {
@@ -73,39 +82,57 @@ export const EndpointsSetup = () => {
     },
   });
 
+  const getRabbitFingerprint = (values: EndpointsFormData) => {
+    return JSON.stringify({
+      host: values.rabbitHost || DEFAULTS.rabbitHost,
+      port: values.rabbitPort || DEFAULTS.rabbitPort,
+      queue: values.rabbitQueue || DEFAULTS.rabbitQueue,
+    });
+  };
 
-  const testRabbit = async () => {
-    setIsTestingRabbit(true);
+  const getOpenSearchFingerprint = (values: EndpointsFormData) => {
+    return JSON.stringify({
+      host: values.openSearchHost || DEFAULTS.openSearchHost,
+      port: values.openSearchPort || DEFAULTS.openSearchPort,
+      user: values.openSearchUser || DEFAULTS.openSearchUser,
+      password: values.openSearchPassword || DEFAULTS.openSearchPassword,
+    });
+  };
+
+  const getLlmFingerprint = (values: EndpointsFormData) => {
+    return JSON.stringify({
+      baseUrl: (values.llmBaseUrl || DEFAULTS.llmBaseUrl).trim(),
+      model: (values.llmModel || DEFAULTS.llmModel).trim(),
+      apiKey: values.llmApiKey?.trim() || '',
+    });
+  };
+
+  const testRabbit = async (): Promise<boolean> => {
+    const values = getValues();
     try {
-      const values = getValues();
-      await apiRequest('/configuration/test_rabbit', {
+      const response = await apiRequest('/configuration/test_rabbit', {
         method: 'POST',
         body: JSON.stringify({
           rabbit_host: values.rabbitHost || DEFAULTS.rabbitHost,
           port: values.rabbitPort || DEFAULTS.rabbitPort,
           rabbit_queue: values.rabbitQueue || DEFAULTS.rabbitQueue,
         }),
-      });
-      toast({
-        title: "Success",
-        description: "RabbitMQ connection test passed.",
-      });
-    } catch (error) {
-      toast({
-        title: "Connection Failed",
-        description: "Could not connect to RabbitMQ. Please check your settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTestingRabbit(false);
+      }) as { succeeded?: boolean };
+      const succeeded = response?.succeeded === true;
+      setRabbitStatus(succeeded ? 'passing' : 'failing');
+      lastTestedRabbit.current = getRabbitFingerprint(values);
+      return succeeded;
+    } catch {
+      setRabbitStatus('failing');
+      lastTestedRabbit.current = getRabbitFingerprint(values);
+      return false;
     }
   };
 
-  const testOpenSearch = async () => {
-    setIsTestingOpenSearch(true);
+  const testOpenSearch = async (): Promise<boolean> => {
+    const values = getValues();
     try {
-      const values = getValues();
-      await apiRequest('/configuration/test_opensearch', {
+      const response = await apiRequest('/configuration/test_opensearch', {
         method: 'POST',
         body: JSON.stringify({
           host: values.openSearchHost || DEFAULTS.openSearchHost,
@@ -113,57 +140,91 @@ export const EndpointsSetup = () => {
           user: values.openSearchUser || DEFAULTS.openSearchUser,
           password: values.openSearchPassword || DEFAULTS.openSearchPassword,
         }),
-      });
-      toast({
-        title: "Success",
-        description: "OpenSearch connection test passed.",
-      });
-    } catch (error) {
-      toast({
-        title: "Connection Failed",
-        description: "Could not connect to OpenSearch. Please check your settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTestingOpenSearch(false);
+      }) as { succeeded?: boolean };
+      const succeeded = response?.succeeded === true;
+      setOpenSearchStatus(succeeded ? 'passing' : 'failing');
+      lastTestedOpenSearch.current = getOpenSearchFingerprint(values);
+      return succeeded;
+    } catch {
+      setOpenSearchStatus('failing');
+      lastTestedOpenSearch.current = getOpenSearchFingerprint(values);
+      return false;
     }
   };
 
-  const testLlm = async () => {
-    setIsTestingLlm(true);
-    try {
-      const values = getValues();
-      const baseUrl = (values.llmBaseUrl || DEFAULTS.llmBaseUrl).trim();
-      const model = (values.llmModel || DEFAULTS.llmModel).trim();
-      const apiKey = values.llmApiKey && values.llmApiKey.trim() !== '' ? values.llmApiKey : null;
+  const testLlm = async (): Promise<boolean> => {
+    const values = getValues();
+    const baseUrl = (values.llmBaseUrl || DEFAULTS.llmBaseUrl).trim();
+    const model = (values.llmModel || DEFAULTS.llmModel).trim();
+    const apiKey = values.llmApiKey && values.llmApiKey.trim() !== '' ? values.llmApiKey : null;
 
-      await apiRequest('/configuration/test_llms', {
+    try {
+      const response = await apiRequest('/configuration/test_llms', {
         method: 'POST',
         body: JSON.stringify({
           base_url: baseUrl,
           model,
           api_key: apiKey,
         }),
-      });
-      toast({
-        title: "Success",
-        description: "LLM connection test passed.",
-      });
-    } catch (error) {
-      toast({
-        title: "Connection Failed",
-        description: "Could not connect to LLM. Please check your settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTestingLlm(false);
+      }) as { succeeded?: boolean };
+      const succeeded = response?.succeeded === true;
+      setLlmStatus(succeeded ? 'passing' : 'failing');
+      lastTestedLlm.current = getLlmFingerprint(values);
+      return succeeded;
+    } catch {
+      setLlmStatus('failing');
+      lastTestedLlm.current = getLlmFingerprint(values);
+      return false;
     }
   };
 
   const onSubmit = async (data: EndpointsFormData) => {
     setIsSubmitting(true);
     try {
-      // Only submit fields that differ from defaults
+      const values = getValues();
+      
+      // Determine which sections need testing
+      const rabbitChanged = getRabbitFingerprint(values) !== lastTestedRabbit.current;
+      const openSearchChanged = getOpenSearchFingerprint(values) !== lastTestedOpenSearch.current;
+      const llmChanged = getLlmFingerprint(values) !== lastTestedLlm.current;
+      
+      const needsRabbitTest = rabbitStatus !== 'passing' || rabbitChanged;
+      const needsOpenSearchTest = openSearchStatus !== 'passing' || openSearchChanged;
+      const needsLlmTest = llmStatus !== 'passing' || llmChanged;
+
+      // Run required tests in parallel
+      const testsToRun: Promise<boolean>[] = [];
+      const testNames: string[] = [];
+      
+      if (needsRabbitTest) {
+        testsToRun.push(testRabbit());
+        testNames.push('RabbitMQ');
+      }
+      if (needsOpenSearchTest) {
+        testsToRun.push(testOpenSearch());
+        testNames.push('OpenSearch');
+      }
+      if (needsLlmTest) {
+        testsToRun.push(testLlm());
+        testNames.push('LLM');
+      }
+
+      if (testsToRun.length > 0) {
+        const results = await Promise.all(testsToRun);
+        const failedTests = testNames.filter((_, i) => !results[i]);
+        
+        if (failedTests.length > 0) {
+          toast({
+            title: "Connection Failed",
+            description: `Failed to connect to: ${failedTests.join(', ')}. Please check your settings.`,
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // All tests passed - save settings
       const payload: Record<string, any> = {};
       if (data.rabbitHost && data.rabbitHost !== DEFAULTS.rabbitHost) payload.rabbitHost = data.rabbitHost;
       if (data.rabbitPort && data.rabbitPort !== DEFAULTS.rabbitPort) payload.rabbitPort = data.rabbitPort;
@@ -179,9 +240,6 @@ export const EndpointsSetup = () => {
       if (Object.keys(payload).length > 0) {
         await settingsService.saveSettings(payload);
       }
-      await settingsService.saveSettings({
-        setupStatus: "EndpointsConfigured",
-      });
       await settingsService.saveSettings({
         setupStatus: "EndpointsConfigured",
       });
@@ -212,18 +270,7 @@ export const EndpointsSetup = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* RabbitMQ Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-md font-medium text-muted-foreground">RabbitMQ</h4>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={testRabbit}
-                  disabled={isTestingRabbit}
-                >
-                  {isTestingRabbit ? "Testing..." : "Test Connection"}
-                </Button>
-              </div>
+              <h4 className="text-md font-medium text-muted-foreground">RabbitMQ</h4>
               
               <div className="space-y-2">
                 <Label htmlFor="rabbitHost">RabbitMQ Host</Label>
@@ -266,18 +313,7 @@ export const EndpointsSetup = () => {
 
             {/* OpenSearch Section */}
             <div className="space-y-4 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <h4 className="text-md font-medium text-muted-foreground">OpenSearch</h4>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={testOpenSearch}
-                  disabled={isTestingOpenSearch}
-                >
-                  {isTestingOpenSearch ? "Testing..." : "Test Connection"}
-                </Button>
-              </div>
+              <h4 className="text-md font-medium text-muted-foreground">OpenSearch</h4>
               <div className="space-y-2">
                 <Label htmlFor="openSearchHost">OpenSearch Host</Label>
                 <Input
@@ -332,18 +368,7 @@ export const EndpointsSetup = () => {
 
             {/* LLMs Section */}
             <div className="space-y-4 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <h4 className="text-md font-medium text-muted-foreground">LLMs</h4>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={testLlm}
-                  disabled={isTestingLlm}
-                >
-                  {isTestingLlm ? "Testing..." : "Test Connection"}
-                </Button>
-              </div>
+              <h4 className="text-md font-medium text-muted-foreground">LLMs</h4>
               
               <div className="space-y-2">
                 <Label htmlFor="llmBaseUrl">LLM Base URL</Label>
@@ -393,7 +418,7 @@ export const EndpointsSetup = () => {
                 Back
               </Button>
               <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Next: Content"}
+                {isSubmitting ? "Testing..." : "Next: Content"}
               </Button>
             </div>
           </form>
