@@ -28,7 +28,7 @@ export const ContentSetup = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const {
     register,
     handleSubmit,
@@ -37,20 +37,20 @@ export const ContentSetup = () => {
   } = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
     defaultValues: {
-      writersNote: '',
-      worldSettings: '',
+      writersNote: "",
+      worldSettings: "",
     },
   });
 
   useEffect(() => {
     const fetchPrompts = async () => {
       try {
-        const response = await apiRequest<any>('/configuration/prompts/batch_get', {
-          method: 'POST',
-          body: JSON.stringify({ templateNames: ['world', 'authors_note'] }),
+        const response = await apiRequest<any>("/configuration/prompts/batch_get", {
+          method: "POST",
+          body: JSON.stringify({ templateNames: ["world", "authors_note"] }),
         });
 
-        console.log('Prompts response:', response);
+        console.log("Prompts response:", response);
 
         // Handle both array and object with templates property
 
@@ -58,15 +58,15 @@ export const ContentSetup = () => {
         const worldPrompts = response["world"];
 
         reset({
-          writersNote: authorsNote?.template || localStorage.getItem('setup_writersNote') || '',
-          worldSettings: worldPrompts?.template || localStorage.getItem('setup_worldSettings') || '',
+          writersNote: authorsNote || localStorage.getItem("setup_writersNote") || "",
+          worldSettings: worldPrompts || localStorage.getItem("setup_worldSettings") || "",
         });
       } catch (error) {
-        console.error('Failed to fetch prompts:', error);
+        console.error("Failed to fetch prompts:", error);
         // Fall back to localStorage
         reset({
-          writersNote: localStorage.getItem('setup_writersNote') || '',
-          worldSettings: localStorage.getItem('setup_worldSettings') || '',
+          writersNote: localStorage.getItem("setup_writersNote") || "",
+          worldSettings: localStorage.getItem("setup_worldSettings") || "",
         });
       } finally {
         setIsLoading(false);
@@ -78,11 +78,11 @@ export const ContentSetup = () => {
 
   const onSubmit = async (data: ContentFormData) => {
     setIsSubmitting(true);
-    
+
     try {
       // Save content data to localStorage
-      localStorage.setItem('setup_writersNote', data.writersNote || '');
-      localStorage.setItem('setup_worldSettings', data.worldSettings || '');
+      localStorage.setItem("setup_writersNote", data.writersNote || "");
+      localStorage.setItem("setup_worldSettings", data.worldSettings || "");
 
       console.log("Content data saved, proceeding to concepts step");
 
@@ -111,9 +111,7 @@ export const ContentSetup = () => {
           <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             Content Configuration
           </CardTitle>
-          <p className="text-muted-foreground">
-            Step 3 of 5: AI and World Settings
-          </p>
+          <p className="text-muted-foreground">Step 3 of 5: AI and World Settings</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -121,7 +119,9 @@ export const ContentSetup = () => {
             <div className="space-y-2">
               <Label htmlFor="writersNote">Writers Note</Label>
               <p className="text-xs text-muted-foreground mb-2">
-                A writers note provides context and instructions to the LLM about the setting, tone, style, and any special considerations for generating content. It helps guide the AI to produce more consistent and appropriate responses for your world.
+                A writers note provides context and instructions to the LLM about the setting, tone, style, and any
+                special considerations for generating content. It helps guide the AI to produce more consistent and
+                appropriate responses for your world.
               </p>
               <Textarea
                 id="writersNote"
@@ -129,16 +129,15 @@ export const ContentSetup = () => {
                 className="min-h-[100px]"
                 {...register("writersNote")}
               />
-              {errors.writersNote && (
-                <p className="text-sm text-destructive">{errors.writersNote.message}</p>
-              )}
+              {errors.writersNote && <p className="text-sm text-destructive">{errors.writersNote.message}</p>}
             </div>
 
             {/* World Settings */}
             <div className="space-y-2">
               <Label htmlFor="worldSettings">World Settings</Label>
               <p className="text-xs text-muted-foreground mb-2">
-                Describe the world or environment for your network. This sets the context and atmosphere for interactions.
+                Describe the world or environment for your network. This sets the context and atmosphere for
+                interactions.
               </p>
               <Textarea
                 id="worldSettings"
@@ -146,25 +145,14 @@ export const ContentSetup = () => {
                 className="min-h-[120px]"
                 {...register("worldSettings")}
               />
-              {errors.worldSettings && (
-                <p className="text-sm text-destructive">{errors.worldSettings.message}</p>
-              )}
+              {errors.worldSettings && <p className="text-sm text-destructive">{errors.worldSettings.message}</p>}
             </div>
 
             <div className="flex gap-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="flex-1"
-                onClick={() => navigate("/setup/endpoints")}
-              >
+              <Button type="button" variant="outline" className="flex-1" onClick={() => navigate("/setup/endpoints")}>
                 Back
               </Button>
-              <Button 
-                type="submit" 
-                className="flex-1"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
                 {isSubmitting ? "Next: Concepts" : "Next: Concepts"}
               </Button>
             </div>
