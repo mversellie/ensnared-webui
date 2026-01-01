@@ -12,17 +12,28 @@ import { useToast } from "@/hooks/use-toast";
 
 const endpointsSchema = z.object({
   // Messenger
-  messengerUrl: z.string().url("Please enter a valid Messenger URL"),
-  messengerPort: z.coerce.number().min(1, "Port must be at least 1").max(65535, "Port must be at most 65535"),
+  messengerUrl: z.string().optional(),
+  messengerPort: z.coerce.number().min(1).max(65535).optional(),
   // OpenSearch
-  openSearchHost: z.string().min(1, "OpenSearch host is required"),
-  openSearchPort: z.coerce.number().min(1, "Port must be at least 1").max(65535, "Port must be at most 65535"),
-  openSearchUser: z.string().min(1, "OpenSearch username is required"),
-  openSearchPassword: z.string().min(1, "OpenSearch password is required"),
+  openSearchHost: z.string().optional(),
+  openSearchPort: z.coerce.number().min(1).max(65535).optional(),
+  openSearchUser: z.string().optional(),
+  openSearchPassword: z.string().optional(),
   // LLM endpoints
-  openaiApiUrl: z.string().url("Please enter a valid OpenAI API URL"),
+  openaiApiUrl: z.string().optional(),
   apiToken: z.string().optional(),
 });
+
+const DEFAULTS = {
+  messengerUrl: '',
+  messengerPort: 5672,
+  openSearchHost: '',
+  openSearchPort: 9200,
+  openSearchUser: '',
+  openSearchPassword: '',
+  openaiApiUrl: '',
+  apiToken: '',
+};
 
 type EndpointsFormData = z.infer<typeof endpointsSchema>;
 
@@ -40,29 +51,36 @@ export const EndpointsSetup = () => {
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
     defaultValues: {
-      messengerUrl: cachedSettings?.messengerUrl || '',
-      messengerPort: cachedSettings?.messengerPort || 5672,
-      openSearchHost: cachedSettings?.openSearchHost || '',
-      openSearchPort: cachedSettings?.openSearchPort || 9200,
-      openSearchUser: cachedSettings?.openSearchUser || '',
-      openSearchPassword: cachedSettings?.openSearchPassword || '',
-      openaiApiUrl: cachedSettings?.openaiApiUrl || '',
-      apiToken: cachedSettings?.apiToken || '',
+      messengerUrl: cachedSettings?.messengerUrl || DEFAULTS.messengerUrl,
+      messengerPort: cachedSettings?.messengerPort || DEFAULTS.messengerPort,
+      openSearchHost: cachedSettings?.openSearchHost || DEFAULTS.openSearchHost,
+      openSearchPort: cachedSettings?.openSearchPort || DEFAULTS.openSearchPort,
+      openSearchUser: cachedSettings?.openSearchUser || DEFAULTS.openSearchUser,
+      openSearchPassword: cachedSettings?.openSearchPassword || DEFAULTS.openSearchPassword,
+      openaiApiUrl: cachedSettings?.openaiApiUrl || DEFAULTS.openaiApiUrl,
+      apiToken: cachedSettings?.apiToken || DEFAULTS.apiToken,
     },
   });
 
   const onSubmit = async (data: EndpointsFormData) => {
     setIsSubmitting(true);
     try {
+      // Only submit fields that differ from defaults
+      const payload: Record<string, any> = {};
+      if (data.messengerUrl && data.messengerUrl !== DEFAULTS.messengerUrl) payload.messengerUrl = data.messengerUrl;
+      if (data.messengerPort && data.messengerPort !== DEFAULTS.messengerPort) payload.messengerPort = data.messengerPort;
+      if (data.openSearchHost && data.openSearchHost !== DEFAULTS.openSearchHost) payload.openSearchHost = data.openSearchHost;
+      if (data.openSearchPort && data.openSearchPort !== DEFAULTS.openSearchPort) payload.openSearchPort = data.openSearchPort;
+      if (data.openSearchUser && data.openSearchUser !== DEFAULTS.openSearchUser) payload.openSearchUser = data.openSearchUser;
+      if (data.openSearchPassword && data.openSearchPassword !== DEFAULTS.openSearchPassword) payload.openSearchPassword = data.openSearchPassword;
+      if (data.openaiApiUrl && data.openaiApiUrl !== DEFAULTS.openaiApiUrl) payload.openaiApiUrl = data.openaiApiUrl;
+      if (data.apiToken && data.apiToken !== DEFAULTS.apiToken) payload.apiToken = data.apiToken;
+
+      if (Object.keys(payload).length > 0) {
+        await settingsService.saveSettings(payload);
+      }
       await settingsService.saveSettings({
-        messengerUrl: data.messengerUrl,
-        messengerPort: data.messengerPort,
-        openSearchHost: data.openSearchHost,
-        openSearchPort: data.openSearchPort,
-        openSearchUser: data.openSearchUser,
-        openSearchPassword: data.openSearchPassword,
-        openaiApiUrl: data.openaiApiUrl,
-        apiToken: data.apiToken,
+        setupStatus: "EndpointsConfigured",
       });
       await settingsService.saveSettings({
         setupStatus: "EndpointsConfigured",
