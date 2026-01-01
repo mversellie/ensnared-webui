@@ -12,7 +12,7 @@ import { settingsService } from "@/services";
 import { apiRequest } from "@/services/api";
 
 const contentSchema = z.object({
-  writersNote: z.string().min(1, "Writers Note is required"),
+  writersNote: z.string().optional(),
   worldSettings: z.string().optional(),
 });
 
@@ -122,7 +122,7 @@ export const ContentSetup = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Writers Note */}
             <div className="space-y-2">
-              <Label htmlFor="writersNote">Writers Note <span className="text-destructive">*</span></Label>
+              <Label htmlFor="writersNote">Writers Note</Label>
               <p className="text-xs text-muted-foreground mb-2">
                 A writers note provides context and instructions to the LLM about the setting, tone, style, and any
                 special considerations for generating content. It helps guide the AI to produce more consistent and
