@@ -45,13 +45,18 @@ export const ContentSetup = () => {
   useEffect(() => {
     const fetchPrompts = async () => {
       try {
-        const response = await apiRequest<PromptTemplate[]>('/configuration/prompts/batch_get', {
+        const response = await apiRequest<{ templates: PromptTemplate[] } | PromptTemplate[]>('/configuration/prompts/batch_get', {
           method: 'POST',
           body: JSON.stringify({ templateNames: ['world', 'authors_note'] }),
         });
 
-        const authorsNote = response.find(p => p.templateName === 'authors_note');
-        const worldPrompts = response.find(p => p.templateName === 'world');
+        console.log('Prompts response:', response);
+
+        // Handle both array and object with templates property
+        const templates = Array.isArray(response) ? response : response.templates;
+
+        const authorsNote = templates?.find(p => p.templateName === 'authors_note');
+        const worldPrompts = templates?.find(p => p.templateName === 'world');
 
         reset({
           writersNote: authorsNote?.template || localStorage.getItem('setup_writersNote') || '',
