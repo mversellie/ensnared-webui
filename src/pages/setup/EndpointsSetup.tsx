@@ -58,6 +58,7 @@ export const EndpointsSetup = () => {
     formState: { errors },
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
+    mode: 'onChange',
     defaultValues: {
       rabbitHost: cachedSettings?.rabbitHost || '',
       rabbitPort: cachedSettings?.rabbitPort ?? undefined,
