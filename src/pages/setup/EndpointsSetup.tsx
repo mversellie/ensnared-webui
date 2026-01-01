@@ -22,8 +22,9 @@ const endpointsSchema = z.object({
   openSearchUser: z.string().optional(),
   openSearchPassword: z.string().optional(),
   // LLM endpoints
-  openaiApiUrl: z.string().optional(),
-  apiToken: z.string().optional(),
+  llmBaseUrl: z.string().optional(),
+  llmModel: z.string().optional(),
+  llmApiKey: z.string().optional(),
 });
 
 const DEFAULTS = {
@@ -34,8 +35,9 @@ const DEFAULTS = {
   openSearchPort: 9200,
   openSearchUser: '',
   openSearchPassword: '',
-  openaiApiUrl: '',
-  apiToken: '',
+  llmBaseUrl: '',
+  llmModel: '',
+  llmApiKey: '',
 };
 
 type EndpointsFormData = z.infer<typeof endpointsSchema>;
@@ -46,6 +48,7 @@ export const EndpointsSetup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingOpenSearch, setIsTestingOpenSearch] = useState(false);
   const [isTestingRabbit, setIsTestingRabbit] = useState(false);
+  const [isTestingLlm, setIsTestingLlm] = useState(false);
   const cachedSettings = settingsService.getCachedSettings();
   
   const {
@@ -63,8 +66,9 @@ export const EndpointsSetup = () => {
       openSearchPort: cachedSettings?.openSearchPort ?? undefined,
       openSearchUser: cachedSettings?.openSearchUser || '',
       openSearchPassword: cachedSettings?.openSearchPassword || '',
-      openaiApiUrl: cachedSettings?.openaiApiUrl || '',
-      apiToken: cachedSettings?.apiToken || '',
+      llmBaseUrl: cachedSettings?.llmBaseUrl || '',
+      llmModel: cachedSettings?.llmModel || '',
+      llmApiKey: cachedSettings?.llmApiKey || '',
     },
   });
 
@@ -124,6 +128,33 @@ export const EndpointsSetup = () => {
     }
   };
 
+  const testLlm = async () => {
+    setIsTestingLlm(true);
+    try {
+      const values = getValues();
+      await apiRequest('/configuration/test_llms', {
+        method: 'POST',
+        body: JSON.stringify({
+          base_url: values.llmBaseUrl || DEFAULTS.llmBaseUrl,
+          model: values.llmModel || DEFAULTS.llmModel,
+          api_key: values.llmApiKey || null,
+        }),
+      });
+      toast({
+        title: "Success",
+        description: "LLM connection test passed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to LLM. Please check your settings.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingLlm(false);
+    }
+  };
+
   const onSubmit = async (data: EndpointsFormData) => {
     setIsSubmitting(true);
     try {
@@ -136,8 +167,9 @@ export const EndpointsSetup = () => {
       if (data.openSearchPort && data.openSearchPort !== DEFAULTS.openSearchPort) payload.openSearchPort = data.openSearchPort;
       if (data.openSearchUser && data.openSearchUser !== DEFAULTS.openSearchUser) payload.openSearchUser = data.openSearchUser;
       if (data.openSearchPassword && data.openSearchPassword !== DEFAULTS.openSearchPassword) payload.openSearchPassword = data.openSearchPassword;
-      if (data.openaiApiUrl && data.openaiApiUrl !== DEFAULTS.openaiApiUrl) payload.openaiApiUrl = data.openaiApiUrl;
-      if (data.apiToken && data.apiToken !== DEFAULTS.apiToken) payload.apiToken = data.apiToken;
+      if (data.llmBaseUrl && data.llmBaseUrl !== DEFAULTS.llmBaseUrl) payload.llmBaseUrl = data.llmBaseUrl;
+      if (data.llmModel && data.llmModel !== DEFAULTS.llmModel) payload.llmModel = data.llmModel;
+      if (data.llmApiKey && data.llmApiKey !== DEFAULTS.llmApiKey) payload.llmApiKey = data.llmApiKey;
 
       if (Object.keys(payload).length > 0) {
         await settingsService.saveSettings(payload);
@@ -295,33 +327,53 @@ export const EndpointsSetup = () => {
 
             {/* LLMs Section */}
             <div className="space-y-4 pt-4 border-t">
-              <h4 className="text-md font-medium text-muted-foreground">LLMs</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-md font-medium text-muted-foreground">LLMs</h4>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={testLlm}
+                  disabled={isTestingLlm}
+                >
+                  {isTestingLlm ? "Testing..." : "Test Connection"}
+                </Button>
+              </div>
               
               <div className="space-y-2">
-                <Label htmlFor="openaiApiUrl">OpenAI API URL</Label>
+                <Label htmlFor="llmBaseUrl">LLM Base URL</Label>
                 <Input
-                  id="openaiApiUrl"
+                  id="llmBaseUrl"
                   placeholder="https://api.openai.com/v1"
-                  {...register("openaiApiUrl")}
+                  {...register("llmBaseUrl")}
                 />
-                {errors.openaiApiUrl && (
-                  <p className="text-sm text-destructive">{errors.openaiApiUrl.message}</p>
+                {errors.llmBaseUrl && (
+                  <p className="text-sm text-destructive">{errors.llmBaseUrl.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="apiToken">API Token (Optional)</Label>
+                <Label htmlFor="llmModel">Model</Label>
                 <Input
-                  id="apiToken"
+                  id="llmModel"
+                  placeholder="gpt-4"
+                  {...register("llmModel")}
+                />
+                {errors.llmModel && (
+                  <p className="text-sm text-destructive">{errors.llmModel.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="llmApiKey">API Key (Optional)</Label>
+                <Input
+                  id="llmApiKey"
                   type="password"
                   placeholder="sk-..."
-                  {...register("apiToken")}
+                  {...register("llmApiKey")}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Your API token will be stored securely via Supabase secrets
-                </p>
-                {errors.apiToken && (
-                  <p className="text-sm text-destructive">{errors.apiToken.message}</p>
+                {errors.llmApiKey && (
+                  <p className="text-sm text-destructive">{errors.llmApiKey.message}</p>
                 )}
               </div>
             </div>
