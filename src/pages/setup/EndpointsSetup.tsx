@@ -51,14 +51,14 @@ export const EndpointsSetup = () => {
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
     defaultValues: {
-      messengerUrl: cachedSettings?.messengerUrl || DEFAULTS.messengerUrl,
-      messengerPort: cachedSettings?.messengerPort || DEFAULTS.messengerPort,
-      openSearchHost: cachedSettings?.openSearchHost || DEFAULTS.openSearchHost,
-      openSearchPort: cachedSettings?.openSearchPort || DEFAULTS.openSearchPort,
-      openSearchUser: cachedSettings?.openSearchUser || DEFAULTS.openSearchUser,
-      openSearchPassword: cachedSettings?.openSearchPassword || DEFAULTS.openSearchPassword,
-      openaiApiUrl: cachedSettings?.openaiApiUrl || DEFAULTS.openaiApiUrl,
-      apiToken: cachedSettings?.apiToken || DEFAULTS.apiToken,
+      messengerUrl: cachedSettings?.messengerUrl || '',
+      messengerPort: cachedSettings?.messengerPort ?? undefined,
+      openSearchHost: cachedSettings?.openSearchHost || '',
+      openSearchPort: cachedSettings?.openSearchPort ?? undefined,
+      openSearchUser: cachedSettings?.openSearchUser || '',
+      openSearchPassword: cachedSettings?.openSearchPassword || '',
+      openaiApiUrl: cachedSettings?.openaiApiUrl || '',
+      apiToken: cachedSettings?.apiToken || '',
     },
   });
 
@@ -132,6 +132,7 @@ export const EndpointsSetup = () => {
                   id="messengerPort"
                   type="number"
                   placeholder="5672"
+                  className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   {...register("messengerPort")}
                 />
                 {errors.messengerPort && (
@@ -162,6 +163,7 @@ export const EndpointsSetup = () => {
                   id="openSearchPort"
                   type="number"
                   placeholder="9200"
+                  className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   {...register("openSearchPort")}
                 />
                 {errors.openSearchPort && (
