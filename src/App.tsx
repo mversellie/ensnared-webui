@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,10 +13,16 @@ import ConceptsSetup from "./pages/setup/ConceptsSetup";
 import CustomConceptsSetup from "./pages/setup/CustomConceptsSetup";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import { settingsService } from "./services";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    settingsService.getSettings();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -36,6 +43,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
