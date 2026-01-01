@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/services/api";
 
 const endpointsSchema = z.object({
   // Messenger
@@ -41,12 +42,13 @@ export const EndpointsSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [isTestingOpenSearch, setIsTestingOpenSearch] = useState(false);
   const cachedSettings = settingsService.getCachedSettings();
   
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
@@ -61,6 +63,35 @@ export const EndpointsSetup = () => {
       apiToken: cachedSettings?.apiToken || '',
     },
   });
+
+
+  const testOpenSearch = async () => {
+    setIsTestingOpenSearch(true);
+    try {
+      const values = getValues();
+      await apiRequest('/configuration/test_opensearch', {
+        method: 'POST',
+        body: JSON.stringify({
+          host: values.openSearchHost || DEFAULTS.openSearchHost,
+          port: values.openSearchPort || DEFAULTS.openSearchPort,
+          user: values.openSearchUser || DEFAULTS.openSearchUser,
+          password: values.openSearchPassword || DEFAULTS.openSearchPassword,
+        }),
+      });
+      toast({
+        title: "Success",
+        description: "OpenSearch connection test passed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to OpenSearch. Please check your settings.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingOpenSearch(false);
+    }
+  };
 
   const onSubmit = async (data: EndpointsFormData) => {
     setIsSubmitting(true);
@@ -143,8 +174,18 @@ export const EndpointsSetup = () => {
 
             {/* OpenSearch Section */}
             <div className="space-y-4 pt-4 border-t">
-              <h4 className="text-md font-medium text-muted-foreground">OpenSearch</h4>
-              
+              <div className="flex items-center justify-between">
+                <h4 className="text-md font-medium text-muted-foreground">OpenSearch</h4>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={testOpenSearch}
+                  disabled={isTestingOpenSearch}
+                >
+                  {isTestingOpenSearch ? "Testing..." : "Test Connection"}
+                </Button>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="openSearchHost">OpenSearch Host</Label>
                 <Input
