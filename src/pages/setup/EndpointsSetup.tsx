@@ -11,9 +11,12 @@ import { settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
 
 const endpointsSchema = z.object({
-  // System endpoints
-  backendApiUrl: z.string().url("Please enter a valid Backend API URL"),
+  // Messenger
   messengerUrl: z.string().url("Please enter a valid Messenger URL"),
+  messengerPort: z.coerce.number().min(1, "Port must be at least 1").max(65535, "Port must be at most 65535"),
+  // OpenSearch
+  openSearchHost: z.string().min(1, "OpenSearch host is required"),
+  openSearchPort: z.coerce.number().min(1, "Port must be at least 1").max(65535, "Port must be at most 65535"),
   // LLM endpoints
   openaiApiUrl: z.string().url("Please enter a valid OpenAI API URL"),
   apiToken: z.string().optional(),
@@ -35,8 +38,10 @@ export const EndpointsSetup = () => {
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
     defaultValues: {
-      backendApiUrl: cachedSettings?.backendApiUrl || '',
       messengerUrl: cachedSettings?.messengerUrl || '',
+      messengerPort: cachedSettings?.messengerPort || 5672,
+      openSearchHost: cachedSettings?.openSearchHost || '',
+      openSearchPort: cachedSettings?.openSearchPort || 9200,
       openaiApiUrl: cachedSettings?.openaiApiUrl || '',
       apiToken: cachedSettings?.apiToken || '',
     },
@@ -46,8 +51,10 @@ export const EndpointsSetup = () => {
     setIsSubmitting(true);
     try {
       await settingsService.saveSettings({
-        backendApiUrl: data.backendApiUrl,
         messengerUrl: data.messengerUrl,
+        messengerPort: data.messengerPort,
+        openSearchHost: data.openSearchHost,
+        openSearchPort: data.openSearchPort,
         openaiApiUrl: data.openaiApiUrl,
         apiToken: data.apiToken,
       });
@@ -79,22 +86,10 @@ export const EndpointsSetup = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* System Section */}
+            {/* Messenger Section */}
             <div className="space-y-4">
-              <h4 className="text-md font-medium text-muted-foreground">System</h4>
+              <h4 className="text-md font-medium text-muted-foreground">Messenger</h4>
               
-              <div className="space-y-2">
-                <Label htmlFor="backendApiUrl">Backend API URL</Label>
-                <Input
-                  id="backendApiUrl"
-                  placeholder="https://api.example.com"
-                  {...register("backendApiUrl")}
-                />
-                {errors.backendApiUrl && (
-                  <p className="text-sm text-destructive">{errors.backendApiUrl.message}</p>
-                )}
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="messengerUrl">Messenger URL</Label>
                 <Input
@@ -104,6 +99,49 @@ export const EndpointsSetup = () => {
                 />
                 {errors.messengerUrl && (
                   <p className="text-sm text-destructive">{errors.messengerUrl.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="messengerPort">Messenger Port</Label>
+                <Input
+                  id="messengerPort"
+                  type="number"
+                  placeholder="5672"
+                  {...register("messengerPort")}
+                />
+                {errors.messengerPort && (
+                  <p className="text-sm text-destructive">{errors.messengerPort.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* OpenSearch Section */}
+            <div className="space-y-4 pt-4 border-t">
+              <h4 className="text-md font-medium text-muted-foreground">OpenSearch</h4>
+              
+              <div className="space-y-2">
+                <Label htmlFor="openSearchHost">OpenSearch Host</Label>
+                <Input
+                  id="openSearchHost"
+                  placeholder="localhost"
+                  {...register("openSearchHost")}
+                />
+                {errors.openSearchHost && (
+                  <p className="text-sm text-destructive">{errors.openSearchHost.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="openSearchPort">OpenSearch Port</Label>
+                <Input
+                  id="openSearchPort"
+                  type="number"
+                  placeholder="9200"
+                  {...register("openSearchPort")}
+                />
+                {errors.openSearchPort && (
+                  <p className="text-sm text-destructive">{errors.openSearchPort.message}</p>
                 )}
               </div>
             </div>
