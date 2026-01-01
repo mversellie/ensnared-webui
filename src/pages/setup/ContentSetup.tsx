@@ -28,6 +28,8 @@ export const ContentSetup = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasApiWritersNote, setHasApiWritersNote] = useState(false);
+  const [hasApiWorldSettings, setHasApiWorldSettings] = useState(false);
 
   const {
     register,
@@ -56,6 +58,9 @@ export const ContentSetup = () => {
 
         const authorsNote = response["authors_note"];
         const worldPrompts = response["world"];
+
+        setHasApiWritersNote(!!authorsNote);
+        setHasApiWorldSettings(!!worldPrompts);
 
         reset({
           writersNote: authorsNote || localStorage.getItem("setup_writersNote") || "",
@@ -126,7 +131,7 @@ export const ContentSetup = () => {
               <Textarea
                 id="writersNote"
                 placeholder="The story takes place in a medieval fantasy setting. Characters should speak formally and reference magic as commonplace..."
-                className="min-h-[100px]"
+                className={`min-h-[100px] ${hasApiWritersNote ? "border-green-500 bg-green-500/10" : ""}`}
                 {...register("writersNote")}
               />
               {errors.writersNote && <p className="text-sm text-destructive">{errors.writersNote.message}</p>}
@@ -142,7 +147,7 @@ export const ContentSetup = () => {
               <Textarea
                 id="worldSettings"
                 placeholder="A magical realm where dragons soar through crystal skies and ancient wizards study in towering spires. The land is filled with mystical creatures, enchanted forests, and powerful artifacts waiting to be discovered..."
-                className="min-h-[120px]"
+                className={`min-h-[120px] ${hasApiWorldSettings ? "border-green-500 bg-green-500/10" : ""}`}
                 {...register("worldSettings")}
               />
               {errors.worldSettings && <p className="text-sm text-destructive">{errors.worldSettings.message}</p>}
