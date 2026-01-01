@@ -74,7 +74,10 @@ export const CustomConceptsSetup = () => {
       console.log("Sending setup data:", setupData);
 
       // Send to /settings endpoint using settingsService
-      const result = await settingsService.saveSettings(setupData);
+      const result = await settingsService.saveSettings({
+        ...setupData,
+        setupStatus: 'Finished',
+      });
       console.log("Setup completed successfully:", result);
 
       toast({
