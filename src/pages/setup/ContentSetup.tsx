@@ -117,6 +117,7 @@ export const ContentSetup = () => {
             Content Configuration
           </CardTitle>
           <p className="text-muted-foreground">Step 3 of 5: AI and World Settings</p>
+          <p className="text-sm text-muted-foreground mt-2">Both fields are optional, but recommended.</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
