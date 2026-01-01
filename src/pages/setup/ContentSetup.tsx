@@ -114,6 +114,9 @@ export const ContentSetup = () => {
         await Promise.all(savePromises);
       }
 
+      // Update setup status
+      await settingsService.saveSettings({ setupStatus: "World Data Configured" });
+
       // Save content data to localStorage
       localStorage.setItem("setup_writersNote", data.writersNote || "");
       localStorage.setItem("setup_worldSettings", data.worldSettings || "");
