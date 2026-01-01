@@ -30,6 +30,8 @@ export const ContentSetup = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasApiWritersNote, setHasApiWritersNote] = useState(false);
   const [hasApiWorldSettings, setHasApiWorldSettings] = useState(false);
+  const [originalWritersNote, setOriginalWritersNote] = useState("");
+  const [originalWorldSettings, setOriginalWorldSettings] = useState("");
 
   const {
     register,
@@ -61,6 +63,8 @@ export const ContentSetup = () => {
 
         setHasApiWritersNote(!!authorsNote);
         setHasApiWorldSettings(!!worldPrompts);
+        setOriginalWritersNote(authorsNote || "");
+        setOriginalWorldSettings(worldPrompts || "");
 
         reset({
           writersNote: authorsNote || localStorage.getItem("setup_writersNote") || "",
@@ -85,6 +89,31 @@ export const ContentSetup = () => {
     setIsSubmitting(true);
 
     try {
+      // Save changed prompts to API
+      const savePromises: Promise<any>[] = [];
+
+      if (data.writersNote !== originalWritersNote) {
+        savePromises.push(
+          apiRequest("/configuration/prompts", {
+            method: "POST",
+            body: JSON.stringify({ name: "authors_note", content: data.writersNote || "" }),
+          })
+        );
+      }
+
+      if (data.worldSettings !== originalWorldSettings) {
+        savePromises.push(
+          apiRequest("/configuration/prompts", {
+            method: "POST",
+            body: JSON.stringify({ name: "world", content: data.worldSettings || "" }),
+          })
+        );
+      }
+
+      if (savePromises.length > 0) {
+        await Promise.all(savePromises);
+      }
+
       // Save content data to localStorage
       localStorage.setItem("setup_writersNote", data.writersNote || "");
       localStorage.setItem("setup_worldSettings", data.worldSettings || "");
