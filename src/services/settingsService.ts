@@ -33,7 +33,7 @@ export const settingsService = {
   },
 
   async fetchAndCache(): Promise<Record<string, any>> {
-    const data = await apiRequest<Record<string, any>>('/settings');
+    const data = await apiRequest<Record<string, any>>('/configuration/settings');
     memoryCache = data;
     localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify({
       data,
@@ -43,7 +43,7 @@ export const settingsService = {
   },
 
   async saveSettings(data: Record<string, any>): Promise<Record<string, any>> {
-    const result = await apiRequest<Record<string, any>>('/settings', {
+    const result = await apiRequest<Record<string, any>>('/configuration/settings', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
