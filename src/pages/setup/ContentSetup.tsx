@@ -45,7 +45,7 @@ export const ContentSetup = () => {
   useEffect(() => {
     const fetchPrompts = async () => {
       try {
-        const response = await apiRequest<{ templates: PromptTemplate[] } | PromptTemplate[]>('/configuration/prompts/batch_get', {
+        const response = await apiRequest<any>('/configuration/prompts/batch_get', {
           method: 'POST',
           body: JSON.stringify({ templateNames: ['world', 'authors_note'] }),
         });
