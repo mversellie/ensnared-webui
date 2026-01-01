@@ -1,30 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Layout } from "@/components/Layout";
+import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Feed } from "@/components/Feed";
 import { Messages } from "@/components/Messages";
 import { settingsService } from "@/services";
-import Setup from "./Setup";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
-  const [needsSetup, setNeedsSetup] = useState(false);
+  const navigate = useNavigate();
 
-  const { error } = useQuery({
+  const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => settingsService.getSettings(),
     retry: false,
   });
 
-  useEffect(() => {
-    if (error && 'status' in error && error.status === 404) {
-      setNeedsSetup(true);
-    }
-  }, [error]);
+  // Redirect to setup if setupStatus is not found
+  if (!isLoading && (!settings || !settings.setupStatus)) {
+    navigate('/setup', { replace: true });
+    return null;
+  }
 
-  if (needsSetup) {
-    return <Setup />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
   }
 
   const renderContent = () => {
