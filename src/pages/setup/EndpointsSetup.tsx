@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/services/api";
+import { AlertCircle } from "lucide-react";
 
 const endpointsSchema = z.object({
   // Messenger (RabbitMQ)
@@ -269,8 +270,15 @@ export const EndpointsSetup = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* RabbitMQ Section */}
-            <div className="space-y-4">
+            <div className={`space-y-4 p-4 -mx-4 rounded-lg transition-colors ${rabbitStatus === 'failing' ? 'bg-destructive/10 border border-destructive/30' : ''}`}>
               <h4 className="text-md font-medium text-muted-foreground">RabbitMQ</h4>
+              
+              {rabbitStatus === 'failing' && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Connection failed. Please check your settings.</span>
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="rabbitHost">RabbitMQ Host</Label>
@@ -312,8 +320,16 @@ export const EndpointsSetup = () => {
             </div>
 
             {/* OpenSearch Section */}
-            <div className="space-y-4 pt-4 border-t">
+            <div className={`space-y-4 pt-4 p-4 -mx-4 rounded-lg border-t transition-colors ${openSearchStatus === 'failing' ? 'bg-destructive/10 border border-destructive/30' : ''}`}>
               <h4 className="text-md font-medium text-muted-foreground">OpenSearch</h4>
+              
+              {openSearchStatus === 'failing' && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Connection failed. Please check your settings.</span>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="openSearchHost">OpenSearch Host</Label>
                 <Input
@@ -367,8 +383,15 @@ export const EndpointsSetup = () => {
             </div>
 
             {/* LLMs Section */}
-            <div className="space-y-4 pt-4 border-t">
+            <div className={`space-y-4 pt-4 p-4 -mx-4 rounded-lg border-t transition-colors ${llmStatus === 'failing' ? 'bg-destructive/10 border border-destructive/30' : ''}`}>
               <h4 className="text-md font-medium text-muted-foreground">LLMs</h4>
+              
+              {llmStatus === 'failing' && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Connection failed. Please check your settings.</span>
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="llmBaseUrl">LLM Base URL</Label>
