@@ -37,6 +37,8 @@ export const NetworkSetup = () => {
     try {
       await settingsService.saveSettings({
         networkTitle: data.networkTitle,
+      });
+      await settingsService.saveSettings({
         setupStatus: "Named",
       });
       navigate("/setup/endpoints");
