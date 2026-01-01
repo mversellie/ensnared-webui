@@ -19,7 +19,7 @@ const contentSchema = z.object({
 type ContentFormData = z.infer<typeof contentSchema>;
 
 interface PromptTemplate {
-  template_name: string;
+  templateName: string;
   template: string;
 }
 
@@ -50,8 +50,8 @@ export const ContentSetup = () => {
           body: JSON.stringify({ templateNames: ['world', 'authors_note'] }),
         });
 
-        const authorsNote = response.find(p => p.template_name === 'authors_note');
-        const worldPrompts = response.find(p => p.template_name === 'world');
+        const authorsNote = response.find(p => p.templateName === 'authors_note');
+        const worldPrompts = response.find(p => p.templateName === 'world');
 
         reset({
           writersNote: authorsNote?.template || localStorage.getItem('setup_writersNote') || '',
