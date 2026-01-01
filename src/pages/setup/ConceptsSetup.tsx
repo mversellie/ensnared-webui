@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +9,20 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { settingsService } from "@/services";
 import { ChipInput } from "@/components/ui/chip-input";
+import { apiRequest } from "@/services/api";
+import { Loader2 } from "lucide-react";
+
+interface ConceptDTO {
+  id: string | null;
+  name: string | null;
+  type: string | null;
+  is_custom: boolean;
+  description: string | null;
+}
+
+interface ConceptListResponse {
+  concepts: ConceptDTO[];
+}
 
 const conceptsSchema = z.object({
   concepts: z.array(z.string()).optional().default([]),
@@ -20,17 +34,42 @@ export const ConceptsSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<ConceptsFormData>({
     resolver: zodResolver(conceptsSchema),
     defaultValues: {
-      concepts: JSON.parse(localStorage.getItem('setup_concepts') || '[]'),
+      concepts: [],
     },
   });
+
+  useEffect(() => {
+    const fetchConcepts = async () => {
+      try {
+        const response = await apiRequest<ConceptListResponse>('/concepts/generate');
+        const conceptNames = response.concepts
+          .map(c => c.name)
+          .filter((name): name is string => name !== null && name !== undefined);
+        reset({ concepts: conceptNames });
+      } catch (error) {
+        console.error('Failed to fetch concepts:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate concepts. You can add them manually.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchConcepts();
+  }, [reset, toast]);
 
   const onSubmit = (data: ConceptsFormData) => {
     // Save concepts to localStorage
@@ -39,6 +78,19 @@ export const ConceptsSetup = () => {
     // Navigate to custom concepts step
     navigate("/setup/custom-concepts");
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Generating concepts...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
