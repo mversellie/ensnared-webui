@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { settingsService } from "@/services";
+import { apiRequest } from "@/services/api";
 
 const contentSchema = z.object({
   writersNote: z.string().optional(),
@@ -17,22 +18,59 @@ const contentSchema = z.object({
 
 type ContentFormData = z.infer<typeof contentSchema>;
 
+interface PromptTemplate {
+  template_name: string;
+  template: string;
+}
+
 export const ContentSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
     defaultValues: {
-      writersNote: localStorage.getItem('setup_writersNote') || '',
-      worldSettings: localStorage.getItem('setup_worldSettings') || '',
+      writersNote: '',
+      worldSettings: '',
     },
   });
+
+  useEffect(() => {
+    const fetchPrompts = async () => {
+      try {
+        const response = await apiRequest<PromptTemplate[]>('/configuration/prompts/batch_get', {
+          method: 'POST',
+          body: JSON.stringify({ template_names: ['world_prompts', 'authors_note'] }),
+        });
+
+        const authorsNote = response.find(p => p.template_name === 'authors_note');
+        const worldPrompts = response.find(p => p.template_name === 'world_prompts');
+
+        reset({
+          writersNote: authorsNote?.template || localStorage.getItem('setup_writersNote') || '',
+          worldSettings: worldPrompts?.template || localStorage.getItem('setup_worldSettings') || '',
+        });
+      } catch (error) {
+        console.error('Failed to fetch prompts:', error);
+        // Fall back to localStorage
+        reset({
+          writersNote: localStorage.getItem('setup_writersNote') || '',
+          worldSettings: localStorage.getItem('setup_worldSettings') || '',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPrompts();
+  }, [reset]);
 
   const onSubmit = async (data: ContentFormData) => {
     setIsSubmitting(true);
