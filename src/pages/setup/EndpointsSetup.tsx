@@ -132,12 +132,16 @@ export const EndpointsSetup = () => {
     setIsTestingLlm(true);
     try {
       const values = getValues();
+      const baseUrl = (values.llmBaseUrl || DEFAULTS.llmBaseUrl).trim();
+      const model = (values.llmModel || DEFAULTS.llmModel).trim();
+      const apiKey = values.llmApiKey && values.llmApiKey.trim() !== '' ? values.llmApiKey : null;
+
       await apiRequest('/configuration/test_llms', {
         method: 'POST',
         body: JSON.stringify({
-          base_url: values.llmBaseUrl || DEFAULTS.llmBaseUrl,
-          model: values.llmModel || DEFAULTS.llmModel,
-          api_key: values.llmApiKey && values.llmApiKey.trim() !== '' ? values.llmApiKey : null,
+          base_url: baseUrl,
+          model,
+          api_key: apiKey,
         }),
       });
       toast({
