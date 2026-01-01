@@ -12,9 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/services/api";
 
 const endpointsSchema = z.object({
-  // Messenger
-  messengerUrl: z.string().optional(),
-  messengerPort: z.coerce.number().min(1).max(65535).optional(),
+  // Messenger (RabbitMQ)
+  rabbitHost: z.string().optional(),
+  rabbitPort: z.coerce.number().min(1).max(65535).optional(),
+  rabbitQueue: z.string().optional(),
   // OpenSearch
   openSearchHost: z.string().optional(),
   openSearchPort: z.coerce.number().min(1).max(65535).optional(),
@@ -26,8 +27,9 @@ const endpointsSchema = z.object({
 });
 
 const DEFAULTS = {
-  messengerUrl: '',
-  messengerPort: 5672,
+  rabbitHost: '',
+  rabbitPort: 5672,
+  rabbitQueue: '',
   openSearchHost: '',
   openSearchPort: 9200,
   openSearchUser: '',
@@ -43,6 +45,7 @@ export const EndpointsSetup = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingOpenSearch, setIsTestingOpenSearch] = useState(false);
+  const [isTestingRabbit, setIsTestingRabbit] = useState(false);
   const cachedSettings = settingsService.getCachedSettings();
   
   const {
@@ -53,8 +56,9 @@ export const EndpointsSetup = () => {
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
     defaultValues: {
-      messengerUrl: cachedSettings?.messengerUrl || '',
-      messengerPort: cachedSettings?.messengerPort ?? undefined,
+      rabbitHost: cachedSettings?.rabbitHost || '',
+      rabbitPort: cachedSettings?.rabbitPort ?? undefined,
+      rabbitQueue: cachedSettings?.rabbitQueue || '',
       openSearchHost: cachedSettings?.openSearchHost || '',
       openSearchPort: cachedSettings?.openSearchPort ?? undefined,
       openSearchUser: cachedSettings?.openSearchUser || '',
@@ -64,6 +68,33 @@ export const EndpointsSetup = () => {
     },
   });
 
+
+  const testRabbit = async () => {
+    setIsTestingRabbit(true);
+    try {
+      const values = getValues();
+      await apiRequest('/configuration/test_rabbit', {
+        method: 'POST',
+        body: JSON.stringify({
+          rabbit_host: values.rabbitHost || DEFAULTS.rabbitHost,
+          port: values.rabbitPort || DEFAULTS.rabbitPort,
+          rabbit_queue: values.rabbitQueue || DEFAULTS.rabbitQueue,
+        }),
+      });
+      toast({
+        title: "Success",
+        description: "RabbitMQ connection test passed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to RabbitMQ. Please check your settings.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingRabbit(false);
+    }
+  };
 
   const testOpenSearch = async () => {
     setIsTestingOpenSearch(true);
@@ -98,8 +129,9 @@ export const EndpointsSetup = () => {
     try {
       // Only submit fields that differ from defaults
       const payload: Record<string, any> = {};
-      if (data.messengerUrl && data.messengerUrl !== DEFAULTS.messengerUrl) payload.messengerUrl = data.messengerUrl;
-      if (data.messengerPort && data.messengerPort !== DEFAULTS.messengerPort) payload.messengerPort = data.messengerPort;
+      if (data.rabbitHost && data.rabbitHost !== DEFAULTS.rabbitHost) payload.rabbitHost = data.rabbitHost;
+      if (data.rabbitPort && data.rabbitPort !== DEFAULTS.rabbitPort) payload.rabbitPort = data.rabbitPort;
+      if (data.rabbitQueue && data.rabbitQueue !== DEFAULTS.rabbitQueue) payload.rabbitQueue = data.rabbitQueue;
       if (data.openSearchHost && data.openSearchHost !== DEFAULTS.openSearchHost) payload.openSearchHost = data.openSearchHost;
       if (data.openSearchPort && data.openSearchPort !== DEFAULTS.openSearchPort) payload.openSearchPort = data.openSearchPort;
       if (data.openSearchUser && data.openSearchUser !== DEFAULTS.openSearchUser) payload.openSearchUser = data.openSearchUser;
@@ -141,33 +173,56 @@ export const EndpointsSetup = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Messenger Section */}
+            {/* RabbitMQ Section */}
             <div className="space-y-4">
-              <h4 className="text-md font-medium text-muted-foreground">Messenger</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-md font-medium text-muted-foreground">RabbitMQ</h4>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={testRabbit}
+                  disabled={isTestingRabbit}
+                >
+                  {isTestingRabbit ? "Testing..." : "Test Connection"}
+                </Button>
+              </div>
               
               <div className="space-y-2">
-                <Label htmlFor="messengerUrl">Messenger URL</Label>
+                <Label htmlFor="rabbitHost">RabbitMQ Host</Label>
                 <Input
-                  id="messengerUrl"
-                  placeholder="https://messenger.example.com"
-                  {...register("messengerUrl")}
+                  id="rabbitHost"
+                  placeholder="localhost"
+                  {...register("rabbitHost")}
                 />
-                {errors.messengerUrl && (
-                  <p className="text-sm text-destructive">{errors.messengerUrl.message}</p>
+                {errors.rabbitHost && (
+                  <p className="text-sm text-destructive">{errors.rabbitHost.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="messengerPort">Messenger Port</Label>
+                <Label htmlFor="rabbitPort">RabbitMQ Port</Label>
                 <Input
-                  id="messengerPort"
+                  id="rabbitPort"
                   type="number"
                   placeholder="5672"
                   className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  {...register("messengerPort")}
+                  {...register("rabbitPort")}
                 />
-                {errors.messengerPort && (
-                  <p className="text-sm text-destructive">{errors.messengerPort.message}</p>
+                {errors.rabbitPort && (
+                  <p className="text-sm text-destructive">{errors.rabbitPort.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rabbitQueue">RabbitMQ Queue</Label>
+                <Input
+                  id="rabbitQueue"
+                  placeholder="my_queue"
+                  {...register("rabbitQueue")}
+                />
+                {errors.rabbitQueue && (
+                  <p className="text-sm text-destructive">{errors.rabbitQueue.message}</p>
                 )}
               </div>
             </div>
