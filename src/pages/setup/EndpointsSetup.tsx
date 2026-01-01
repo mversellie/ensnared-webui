@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { settingsService } from "@/services";
+import { useToast } from "@/hooks/use-toast";
 
 const endpointsSchema = z.object({
   // System endpoints
@@ -20,6 +23,10 @@ type EndpointsFormData = z.infer<typeof endpointsSchema>;
 
 export const EndpointsSetup = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const cachedSettings = settingsService.getCachedSettings();
   
   const {
     register,
@@ -28,21 +35,35 @@ export const EndpointsSetup = () => {
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
     defaultValues: {
-      backendApiUrl: localStorage.getItem('setup_backendApiUrl') || '',
-      messengerUrl: localStorage.getItem('setup_messengerUrl') || '',
-      openaiApiUrl: localStorage.getItem('setup_openaiApiUrl') || '',
-      apiToken: localStorage.getItem('setup_apiToken') || '',
+      backendApiUrl: cachedSettings?.backendApiUrl || '',
+      messengerUrl: cachedSettings?.messengerUrl || '',
+      openaiApiUrl: cachedSettings?.openaiApiUrl || '',
+      apiToken: cachedSettings?.apiToken || '',
     },
   });
 
-  const onSubmit = (data: EndpointsFormData) => {
-    console.log("Endpoints data:", data);
-    // Save to localStorage
-    localStorage.setItem('setup_backendApiUrl', data.backendApiUrl);
-    localStorage.setItem('setup_messengerUrl', data.messengerUrl);
-    localStorage.setItem('setup_openaiApiUrl', data.openaiApiUrl);
-    if (data.apiToken) localStorage.setItem('setup_apiToken', data.apiToken);
-    navigate("/setup/content");
+  const onSubmit = async (data: EndpointsFormData) => {
+    setIsSubmitting(true);
+    try {
+      await settingsService.saveSettings({
+        backendApiUrl: data.backendApiUrl,
+        messengerUrl: data.messengerUrl,
+        openaiApiUrl: data.openaiApiUrl,
+        apiToken: data.apiToken,
+      });
+      await settingsService.saveSettings({
+        setupStatus: "EndpointsConfigured",
+      });
+      navigate("/setup/content");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save settings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -129,8 +150,8 @@ export const EndpointsSetup = () => {
               >
                 Back
               </Button>
-              <Button type="submit" className="flex-1">
-                Next: Content
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Next: Content"}
               </Button>
             </div>
           </form>
