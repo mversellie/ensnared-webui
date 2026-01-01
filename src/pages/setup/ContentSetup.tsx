@@ -53,7 +53,7 @@ export const ContentSetup = () => {
         console.log('Prompts response:', response);
 
         // Handle both array and object with templates property
-        const templates = Array.isArray(response) ? response : response.templates;
+        const templates = response.templates;
 
         const authorsNote = templates?.find(p => p.templateName === 'authors_note');
         const worldPrompts = templates?.find(p => p.templateName === 'world');
