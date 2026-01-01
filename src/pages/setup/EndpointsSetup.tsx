@@ -17,6 +17,8 @@ const endpointsSchema = z.object({
   // OpenSearch
   openSearchHost: z.string().min(1, "OpenSearch host is required"),
   openSearchPort: z.coerce.number().min(1, "Port must be at least 1").max(65535, "Port must be at most 65535"),
+  openSearchUser: z.string().min(1, "OpenSearch username is required"),
+  openSearchPassword: z.string().min(1, "OpenSearch password is required"),
   // LLM endpoints
   openaiApiUrl: z.string().url("Please enter a valid OpenAI API URL"),
   apiToken: z.string().optional(),
@@ -42,6 +44,8 @@ export const EndpointsSetup = () => {
       messengerPort: cachedSettings?.messengerPort || 5672,
       openSearchHost: cachedSettings?.openSearchHost || '',
       openSearchPort: cachedSettings?.openSearchPort || 9200,
+      openSearchUser: cachedSettings?.openSearchUser || '',
+      openSearchPassword: cachedSettings?.openSearchPassword || '',
       openaiApiUrl: cachedSettings?.openaiApiUrl || '',
       apiToken: cachedSettings?.apiToken || '',
     },
@@ -55,6 +59,8 @@ export const EndpointsSetup = () => {
         messengerPort: data.messengerPort,
         openSearchHost: data.openSearchHost,
         openSearchPort: data.openSearchPort,
+        openSearchUser: data.openSearchUser,
+        openSearchPassword: data.openSearchPassword,
         openaiApiUrl: data.openaiApiUrl,
         apiToken: data.apiToken,
       });
@@ -142,6 +148,31 @@ export const EndpointsSetup = () => {
                 />
                 {errors.openSearchPort && (
                   <p className="text-sm text-destructive">{errors.openSearchPort.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="openSearchUser">OpenSearch Username</Label>
+                <Input
+                  id="openSearchUser"
+                  placeholder="admin"
+                  {...register("openSearchUser")}
+                />
+                {errors.openSearchUser && (
+                  <p className="text-sm text-destructive">{errors.openSearchUser.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="openSearchPassword">OpenSearch Password</Label>
+                <Input
+                  id="openSearchPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  {...register("openSearchPassword")}
+                />
+                {errors.openSearchPassword && (
+                  <p className="text-sm text-destructive">{errors.openSearchPassword.message}</p>
                 )}
               </div>
             </div>
