@@ -236,11 +236,25 @@ export const EndpointsSetup = () => {
       if (data.openSearchPassword && data.openSearchPassword !== DEFAULTS.openSearchPassword) payload.openSearchPassword = data.openSearchPassword;
       if (data.llmBaseUrl && data.llmBaseUrl !== DEFAULTS.llmBaseUrl) payload.llmBaseUrl = data.llmBaseUrl;
       if (data.llmModel && data.llmModel !== DEFAULTS.llmModel) payload.llmModel = data.llmModel;
-      if (data.llmApiKey && data.llmApiKey !== DEFAULTS.llmApiKey) payload.llmApiKey = data.llmApiKey;
 
+      // Save settings and secrets in parallel
+      const savePromises: Promise<any>[] = [];
+      
       if (Object.keys(payload).length > 0) {
-        await settingsService.saveSettings(payload);
+        savePromises.push(settingsService.saveSettings(payload));
       }
+      
+      // Send API key to secrets endpoint
+      if (data.llmApiKey && data.llmApiKey !== DEFAULTS.llmApiKey) {
+        savePromises.push(
+          apiRequest('/configuration/secrets', {
+            method: 'PUT',
+            body: JSON.stringify({ llmApiKey: data.llmApiKey }),
+          })
+        );
+      }
+      
+      await Promise.all(savePromises);
       await settingsService.saveSettings({
         setupStatus: "Endpoints Configured",
       });
