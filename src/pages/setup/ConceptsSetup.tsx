@@ -87,21 +87,6 @@ export const ConceptsSetup = () => {
     setIsSubmitting(true);
     
     try {
-      // Format concepts for the API (same format as received)
-      const conceptsPayload = {
-        concepts: (data.concepts || []).map(name => ({
-          name,
-          is_custom: false,
-        })),
-      };
-
-      // POST concepts to /conceptuals/
-      await apiRequest('/conceptuals/', {
-        method: 'POST',
-        body: JSON.stringify(conceptsPayload),
-      });
-      console.log("Concepts saved:", conceptsPayload);
-
       // Collect all setup data from localStorage
       const setupData = {
         networkTitle: localStorage.getItem('setup_networkTitle') || '',
@@ -113,6 +98,8 @@ export const ConceptsSetup = () => {
         worldSettings: localStorage.getItem('setup_worldSettings') || '',
         concepts: data.concepts,
       };
+
+      console.log("Sending setup data:", setupData);
 
       // Send to /settings endpoint using settingsService
       const result = await settingsService.saveSettings({
