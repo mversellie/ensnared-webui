@@ -1,20 +1,38 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { Post } from "./Post";
 import { postService } from "@/services";
-import { PostDTO } from "@/types/api";
+import { apiRequest } from "@/services/api";
+import { PostDTO, PostListResponse } from "@/types/api";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export const Feed = () => {
   const [searchParams] = useSearchParams();
   const userId = searchParams.get('user_id');
+  const queryClient = useQueryClient();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const { data: postsData, isLoading, error } = useQuery({
     queryKey: ['feed', userId],
     queryFn: () => userId ? postService.getFeed(userId) : postService.getPosts(),
-    enabled: !!userId,
   });
+
+  const handleRandomPost = async () => {
+    setIsGenerating(true);
+    try {
+      const newPost = await apiRequest<PostDTO>('/random_behavior/random_post');
+      queryClient.setQueryData(['feed', userId], (oldData: PostListResponse | undefined) => ({
+        posts: [newPost, ...(oldData?.posts || [])],
+      }));
+    } catch (err) {
+      console.error('Failed to generate random post:', err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   // Sort posts by date descending
   const posts: PostDTO[] = postsData?.posts?.sort((a, b) => 
@@ -22,8 +40,14 @@ export const Feed = () => {
   ) || [];
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button onClick={handleRandomPost} disabled={isGenerating}>
+          <Sparkles className="h-4 w-4 mr-2" />
+          {isGenerating ? 'Generating...' : 'Random Post'}
+        </Button>
+      </div>
         {[...Array(3)].map((_, i) => (
           <div key={i} className="bg-card rounded-xl p-6 shadow-soft animate-pulse">
             <div className="flex items-center gap-3 mb-4">
