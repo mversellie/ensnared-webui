@@ -122,7 +122,7 @@ export const ConceptsSetup = () => {
       // Send to /settings endpoint using settingsService
       const result = await settingsService.saveSettings({
         ...setupData,
-        setupStatus: 'Creating',
+        setupStatus: 'Finished',
       });
       console.log("Setup completed successfully:", result);
 

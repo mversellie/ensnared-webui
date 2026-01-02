@@ -23,9 +23,6 @@ export const Setup = () => {
           case "World Data Configured":
             navigate("/setup/concepts", { replace: true });
             break;
-          case "Creating":
-            navigate("/setup/creating", { replace: true });
-            break;
           case "Finished":
             navigate("/", { replace: true });
             break;
