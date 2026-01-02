@@ -92,8 +92,8 @@ export const EndpointsSetup = () => {
         if (secrets?.openSearchPassword) {
           setValue('openSearchPassword', secrets.openSearchPassword);
         }
-        if (secrets?.apiKey) {
-          setValue('llmApiKey', secrets.apiKey);
+        if (secrets?.apiToken) {
+          setValue('llmApiKey', secrets.apiToken);
         }
       } catch {
         // Secrets may not exist yet, ignore error
@@ -268,7 +268,7 @@ export const EndpointsSetup = () => {
         secrets.openSearchPassword = data.openSearchPassword;
       }
       if (data.llmApiKey) {
-        secrets.apiKey = data.llmApiKey;
+        secrets.apiToken = data.llmApiKey;
       }
       
       if (Object.keys(secrets).length > 0) {
