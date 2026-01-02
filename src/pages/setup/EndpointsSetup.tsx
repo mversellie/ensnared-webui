@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -65,6 +65,7 @@ export const EndpointsSetup = () => {
     register,
     handleSubmit,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<EndpointsFormData>({
     resolver: zodResolver(endpointsSchema),
@@ -76,12 +77,30 @@ export const EndpointsSetup = () => {
       openSearchHost: cachedSettings?.openSearchHost || '',
       openSearchPort: cachedSettings?.openSearchPort ?? undefined,
       openSearchUser: cachedSettings?.openSearchUser || '',
-      openSearchPassword: cachedSettings?.openSearchPassword || '',
+      openSearchPassword: '',
       llmBaseUrl: cachedSettings?.llmBaseUrl || '',
       llmModel: cachedSettings?.llmModel || '',
-      llmApiKey: cachedSettings?.llmApiKey || '',
+      llmApiKey: '',
     },
   });
+
+  // Fetch secrets on mount to populate password/API key fields
+  useEffect(() => {
+    const fetchSecrets = async () => {
+      try {
+        const secrets = await apiRequest<Record<string, string>>('/configuration/secrets');
+        if (secrets?.openSearchPassword) {
+          setValue('openSearchPassword', secrets.openSearchPassword);
+        }
+        if (secrets?.llmApiKey) {
+          setValue('llmApiKey', secrets.llmApiKey);
+        }
+      } catch {
+        // Secrets may not exist yet, ignore error
+      }
+    };
+    fetchSecrets();
+  }, [setValue]);
 
   const getRabbitFingerprint = (values: EndpointsFormData) => {
     return JSON.stringify({
