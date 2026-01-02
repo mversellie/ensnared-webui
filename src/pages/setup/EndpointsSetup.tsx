@@ -268,7 +268,7 @@ export const EndpointsSetup = () => {
         secrets.openSearchPassword = data.openSearchPassword;
       }
       if (data.llmApiKey && data.llmApiKey.trim() !== '') {
-        secrets.apiToken = data.llmApiKey;
+        secrets.apiKey = data.llmApiKey;
       }
       
       if (Object.keys(secrets).length > 0) {
