@@ -262,12 +262,12 @@ export const EndpointsSetup = () => {
         savePromises.push(settingsService.saveSettings(payload));
       }
       
-      // Send secrets to secrets endpoint
+      // Send secrets to secrets endpoint (only if non-empty)
       const secrets: Record<string, string> = {};
-      if (data.openSearchPassword) {
+      if (data.openSearchPassword && data.openSearchPassword.trim() !== '') {
         secrets.openSearchPassword = data.openSearchPassword;
       }
-      if (data.llmApiKey) {
+      if (data.llmApiKey && data.llmApiKey.trim() !== '') {
         secrets.apiToken = data.llmApiKey;
       }
       
