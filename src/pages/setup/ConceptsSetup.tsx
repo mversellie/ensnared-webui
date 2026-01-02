@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { settingsService } from "@/services";
 import { ChipInput } from "@/components/ui/chip-input";
 import { apiRequest } from "@/services/api";
+import { settingsService } from "@/services";
 import { Loader2 } from "lucide-react";
 
 interface ConceptDTO {
@@ -83,12 +83,56 @@ export const ConceptsSetup = () => {
     fetchConcepts();
   }, [reset, toast]);
 
-  const onSubmit = (data: ConceptsFormData) => {
-    // Save concepts to localStorage
-    localStorage.setItem('setup_concepts', JSON.stringify(data.concepts));
+  const onSubmit = async (data: ConceptsFormData) => {
+    setIsSubmitting(true);
     
-    // Navigate to custom concepts step
-    navigate("/setup/custom-concepts");
+    try {
+      // Collect all setup data from localStorage
+      const setupData = {
+        networkTitle: localStorage.getItem('setup_networkTitle') || '',
+        backendApiUrl: localStorage.getItem('setup_backendApiUrl') || '',
+        messengerUrl: localStorage.getItem('setup_messengerUrl') || '',
+        openaiApiUrl: localStorage.getItem('setup_openaiApiUrl') || '',
+        apiToken: localStorage.getItem('setup_apiToken') || '',
+        writersNote: localStorage.getItem('setup_writersNote') || '',
+        worldSettings: localStorage.getItem('setup_worldSettings') || '',
+        concepts: data.concepts,
+      };
+
+      console.log("Sending setup data:", setupData);
+
+      // Send to /settings endpoint using settingsService
+      const result = await settingsService.saveSettings({
+        ...setupData,
+        setupStatus: 'Finished',
+      });
+      console.log("Setup completed successfully:", result);
+
+      toast({
+        title: "Setup Complete",
+        description: "Your configuration has been saved successfully.",
+      });
+
+      // Clear all setup data after successful submission
+      localStorage.removeItem('setup_networkTitle');
+      localStorage.removeItem('setup_backendApiUrl');
+      localStorage.removeItem('setup_messengerUrl');
+      localStorage.removeItem('setup_openaiApiUrl');
+      localStorage.removeItem('setup_apiToken');
+      localStorage.removeItem('setup_writersNote');
+      localStorage.removeItem('setup_worldSettings');
+
+      navigate("/");
+    } catch (error) {
+      console.error("Error submitting setup:", error);
+      toast({
+        title: "Setup Failed",
+        description: "Failed to save configuration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -112,7 +156,7 @@ export const ConceptsSetup = () => {
             Define Concepts
           </CardTitle>
           <p className="text-muted-foreground">
-            Step 4 of 5: Concepts
+            Step 4 of 4: Concepts
           </p>
         </CardHeader>
         <CardContent>
@@ -123,8 +167,7 @@ export const ConceptsSetup = () => {
               <p className="text-xs text-muted-foreground mb-3">
                Your social network relies on concepts to generate people, locations and posts.  
                 Some have already been populated from your system prompt and world data.
-                Please enter additional concepts which you would like to see in your social network below.  
-                You can also define custom concepts on the next page.  
+                Please enter additional concepts which you would like to see in your social network below.
               </p>
               <Controller
                 name="concepts"
@@ -154,8 +197,9 @@ export const ConceptsSetup = () => {
               <Button 
                 type="submit" 
                 className="flex-1"
+                disabled={isSubmitting}
               >
-                Next: Custom Concepts
+                {isSubmitting ? "Saving..." : "Complete Setup"}
               </Button>
             </div>
           </form>
