@@ -121,15 +121,6 @@ export const ContentSetup = () => {
       localStorage.setItem("setup_writersNote", data.writersNote || "");
       localStorage.setItem("setup_worldSettings", data.worldSettings || "");
 
-      // Trigger concept generation after world data is saved
-      try {
-        await apiRequest('/conceptuals/generate', { method: 'GET' });
-        console.log("Concepts generated successfully");
-      } catch (genError) {
-        console.error("Failed to generate concepts:", genError);
-        // Continue anyway - user can add concepts manually
-      }
-
       console.log("Content data saved, proceeding to concepts step");
 
       toast({

@@ -51,16 +51,23 @@ export const ConceptsSetup = () => {
   useEffect(() => {
     const fetchConcepts = async () => {
       try {
-        // Fetch existing concepts (generated during content setup)
+        // First check if concepts already exist
         const existingResponse = await apiRequest<ConceptListResponse>('/conceptuals/all');
         
         if (existingResponse.concepts && existingResponse.concepts.length > 0) {
+          // Use existing concepts
           const conceptNames = existingResponse.concepts
             .map(c => c.name)
             .filter((name): name is string => name !== null && name !== undefined);
           reset({ concepts: conceptNames });
+        } else {
+          // No existing concepts, generate new ones
+          const response = await apiRequest<ConceptListResponse>('/conceptuals/generate');
+          const conceptNames = response.concepts
+            .map(c => c.name)
+            .filter((name): name is string => name !== null && name !== undefined);
+          reset({ concepts: conceptNames });
         }
-        // If no concepts exist, user can add them manually
       } catch (error) {
         console.error('Failed to fetch concepts:', error);
         toast({
