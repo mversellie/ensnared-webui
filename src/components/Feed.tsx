@@ -7,6 +7,7 @@ import { PostDTO, PostListResponse } from "@/types/api";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 export const Feed = () => {
@@ -14,6 +15,7 @@ export const Feed = () => {
   const userId = searchParams.get('user_id');
   const queryClient = useQueryClient();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generateCount, setGenerateCount] = useState(1);
 
   const { data: postsData, isLoading, error } = useQuery({
     queryKey: ['feed', userId],
@@ -23,10 +25,13 @@ export const Feed = () => {
   const handleRandomPost = async () => {
     setIsGenerating(true);
     try {
-      const newPost = await apiRequest<PostDTO>('/random_behavior/random_post');
-      queryClient.setQueryData(['feed', userId], (oldData: PostListResponse | undefined) => ({
-        posts: [newPost, ...(oldData?.posts || [])],
-      }));
+      const count = Math.max(1, Math.min(100, generateCount));
+      for (let i = 0; i < count; i++) {
+        const newPost = await apiRequest<PostDTO>('/random_behavior/random_post');
+        queryClient.setQueryData(['feed', userId], (oldData: PostListResponse | undefined) => ({
+          posts: [newPost, ...(oldData?.posts || [])],
+        }));
+      }
     } catch (err) {
       console.error('Failed to generate random post:', err);
     } finally {
@@ -42,10 +47,18 @@ export const Feed = () => {
   if (isLoading) {
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <Input
+          type="number"
+          min={1}
+          max={100}
+          value={generateCount}
+          onChange={(e) => setGenerateCount(parseInt(e.target.value) || 1)}
+          className="w-20"
+        />
         <Button onClick={handleRandomPost} disabled={isGenerating}>
           <Sparkles className="h-4 w-4 mr-2" />
-          {isGenerating ? 'Generating...' : 'Random Post'}
+          {isGenerating ? 'Generating...' : 'Random Posts'}
         </Button>
       </div>
         {[...Array(3)].map((_, i) => (
@@ -70,6 +83,20 @@ export const Feed = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-end gap-2">
+        <Input
+          type="number"
+          min={1}
+          max={100}
+          value={generateCount}
+          onChange={(e) => setGenerateCount(parseInt(e.target.value) || 1)}
+          className="w-20"
+        />
+        <Button onClick={handleRandomPost} disabled={isGenerating}>
+          <Sparkles className="h-4 w-4 mr-2" />
+          {isGenerating ? 'Generating...' : 'Random Posts'}
+        </Button>
+      </div>
       {error && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
