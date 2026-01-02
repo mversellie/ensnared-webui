@@ -43,6 +43,20 @@ export const settingsService = {
   },
 
   async saveSettings(data: Record<string, any>): Promise<Record<string, any>> {
+    // Prevent setupStatus from reverting to a previous state
+    const statusOrder = ['Not Started', 'Named', 'EndpointsConfigured', 'ContentConfigured', 'Creating', 'Finished'];
+    
+    if (data.setupStatus) {
+      const currentStatus = memoryCache?.setupStatus || this.getCachedSettings()?.setupStatus;
+      const currentIndex = statusOrder.indexOf(currentStatus);
+      const newIndex = statusOrder.indexOf(data.setupStatus);
+      
+      // If current status is further along, don't allow reverting
+      if (currentIndex > newIndex && currentIndex !== -1 && newIndex !== -1) {
+        delete data.setupStatus;
+      }
+    }
+
     const result = await apiRequest<Record<string, any>>('/configuration/settings', {
       method: 'PUT',
       body: JSON.stringify(data),
