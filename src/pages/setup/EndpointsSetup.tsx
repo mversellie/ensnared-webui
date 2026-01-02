@@ -23,7 +23,7 @@ const endpointsSchema = z.object({
   openSearchUser: z.string().optional(),
   openSearchPassword: z.string().optional(),
   // LLM endpoints
-  llmBaseUrl: z.string().optional(),
+  LLMLocation: z.string().optional(),
   llmModel: z.string().optional(),
   llmApiKey: z.string().optional(),
 });
@@ -36,7 +36,7 @@ const DEFAULTS = {
   openSearchPort: 9200,
   openSearchUser: '',
   openSearchPassword: '',
-  llmBaseUrl: '',
+  LLMLocation: '',
   llmModel: '',
   llmApiKey: '',
 };
@@ -78,7 +78,7 @@ export const EndpointsSetup = () => {
       openSearchPort: cachedSettings?.openSearchPort ?? undefined,
       openSearchUser: cachedSettings?.openSearchUser || '',
       openSearchPassword: '',
-      llmBaseUrl: cachedSettings?.llmBaseUrl || '',
+      LLMLocation: cachedSettings?.LLMLocation || '',
       llmModel: cachedSettings?.llmModel || '',
       llmApiKey: '',
     },
@@ -121,7 +121,7 @@ export const EndpointsSetup = () => {
 
   const getLlmFingerprint = (values: EndpointsFormData) => {
     return JSON.stringify({
-      baseUrl: (values.llmBaseUrl || DEFAULTS.llmBaseUrl).trim(),
+      baseUrl: (values.LLMLocation || DEFAULTS.LLMLocation).trim(),
       model: (values.llmModel || DEFAULTS.llmModel).trim(),
       apiKey: values.llmApiKey?.trim() || '',
     });
@@ -174,7 +174,7 @@ export const EndpointsSetup = () => {
 
   const testLlm = async (): Promise<boolean> => {
     const values = getValues();
-    const baseUrl = (values.llmBaseUrl || DEFAULTS.llmBaseUrl).trim();
+    const baseUrl = (values.LLMLocation || DEFAULTS.LLMLocation).trim();
     const model = (values.llmModel || DEFAULTS.llmModel).trim();
     const apiKey = values.llmApiKey && values.llmApiKey.trim() !== '' ? values.llmApiKey : null;
 
@@ -252,7 +252,7 @@ export const EndpointsSetup = () => {
       if (data.openSearchHost && data.openSearchHost !== DEFAULTS.openSearchHost) payload.openSearchHost = data.openSearchHost;
       if (data.openSearchPort && data.openSearchPort !== DEFAULTS.openSearchPort) payload.openSearchPort = data.openSearchPort;
       if (data.openSearchUser && data.openSearchUser !== DEFAULTS.openSearchUser) payload.openSearchUser = data.openSearchUser;
-      if (data.llmBaseUrl && data.llmBaseUrl !== DEFAULTS.llmBaseUrl) payload.llmBaseUrl = data.llmBaseUrl;
+      if (data.LLMLocation && data.LLMLocation !== DEFAULTS.LLMLocation) payload.LLMLocation = data.LLMLocation;
       if (data.llmModel && data.llmModel !== DEFAULTS.llmModel) payload.llmModel = data.llmModel;
 
       // Save settings and secrets in parallel
@@ -434,14 +434,14 @@ export const EndpointsSetup = () => {
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="llmBaseUrl">LLM Base URL</Label>
+                <Label htmlFor="LLMLocation">LLM Location</Label>
                 <Input
-                  id="llmBaseUrl"
+                  id="LLMLocation"
                   placeholder="https://api.openai.com/v1"
-                  {...register("llmBaseUrl")}
+                  {...register("LLMLocation")}
                 />
-                {errors.llmBaseUrl && (
-                  <p className="text-sm text-destructive">{errors.llmBaseUrl.message}</p>
+                {errors.LLMLocation && (
+                  <p className="text-sm text-destructive">{errors.LLMLocation.message}</p>
                 )}
               </div>
 
