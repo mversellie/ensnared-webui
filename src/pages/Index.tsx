@@ -18,7 +18,7 @@ const Index = () => {
 
   // Redirect to creating page if status is Creating
   if (!isLoading && settings?.setupStatus === 'Creating') {
-    navigate('/creating', { replace: true });
+    navigate('/setup/creating', { replace: true });
     return null;
   }
 
