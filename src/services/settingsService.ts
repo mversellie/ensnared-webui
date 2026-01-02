@@ -33,7 +33,13 @@ export const settingsService = {
   },
 
   async fetchAndCache(): Promise<Record<string, any>> {
-    const data = await apiRequest<Record<string, any>>('/configuration/settings');
+    // Fetch settings and progress in parallel
+    const [settings, progress] = await Promise.all([
+      apiRequest<Record<string, any>>('/configuration/settings'),
+      apiRequest<{ status: string }>('/setup/progress'),
+    ]);
+    
+    const data = { ...settings, setupStatus: progress.status };
     memoryCache = data;
     localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify({
       data,
@@ -43,31 +49,43 @@ export const settingsService = {
   },
 
   async saveSettings(data: Record<string, any>): Promise<Record<string, any>> {
+    // Extract setupStatus for separate handling
+    const { setupStatus, ...settingsData } = data;
+    
     // Prevent setupStatus from reverting to a previous state
     const statusOrder = ['Not Started', 'Named', 'EndpointsConfigured', 'ContentConfigured', 'Creating', 'Finished'];
     
-    if (data.setupStatus) {
+    let shouldUpdateStatus = false;
+    if (setupStatus) {
       const currentStatus = memoryCache?.setupStatus || this.getCachedSettings()?.setupStatus;
       const currentIndex = statusOrder.indexOf(currentStatus);
-      const newIndex = statusOrder.indexOf(data.setupStatus);
+      const newIndex = statusOrder.indexOf(setupStatus);
       
-      // If current status is further along, don't allow reverting
-      if (currentIndex > newIndex && currentIndex !== -1 && newIndex !== -1) {
-        delete data.setupStatus;
-      }
+      // Only update if moving forward or status not found in order
+      shouldUpdateStatus = currentIndex <= newIndex || currentIndex === -1 || newIndex === -1;
     }
 
-    const result = await apiRequest<Record<string, any>>('/configuration/settings', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-    // Update cache with new settings
-    memoryCache = result;
-    localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify({
-      data: result,
-      timestamp: Date.now(),
-    }));
-    return result;
+    // Save settings and optionally update progress
+    const promises: Promise<any>[] = [];
+    
+    if (Object.keys(settingsData).length > 0) {
+      promises.push(apiRequest<Record<string, any>>('/configuration/settings', {
+        method: 'PUT',
+        body: JSON.stringify(settingsData),
+      }));
+    }
+    
+    if (shouldUpdateStatus) {
+      promises.push(apiRequest<{ status: string }>('/setup/progress', {
+        method: 'POST',
+        body: JSON.stringify({ status: setupStatus }),
+      }));
+    }
+
+    await Promise.all(promises);
+    
+    // Refresh cache after save
+    return this.fetchAndCache();
   },
 
   getCachedSettings(): Record<string, any> | null {
