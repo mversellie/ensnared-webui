@@ -10,20 +10,20 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading, error } = useQuery({
     queryKey: ['settings'],
     queryFn: () => settingsService.getSettings(),
     retry: false,
   });
 
   // Redirect to creating page if status is Creating
-  if (!isLoading && settings?.setupStatus === 'Creating') {
+  if (!isLoading && !error && settings?.setupStatus === 'Creating') {
     navigate('/setup/creating', { replace: true });
     return null;
   }
 
   // Redirect to setup if setupStatus isn't finished
-  if (!isLoading && (!settings || settings.setupStatus !== 'Finished')) {
+  if (!isLoading && !error && (!settings || settings.setupStatus !== 'Finished')) {
     navigate('/setup', { replace: true });
     return null;
   }
@@ -32,6 +32,14 @@ const Index = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-muted-foreground">Failed to load settings (check API endpoint).</div>
       </div>
     );
   }
