@@ -16,8 +16,14 @@ const Index = () => {
     retry: false,
   });
 
-  // Redirect to setup if setupStatus isn't finished or creating
-  if (!isLoading && (!settings || (settings.setupStatus !== 'Finished' && settings.setupStatus !== 'Creating'))) {
+  // Redirect to creating page if status is Creating
+  if (!isLoading && settings?.setupStatus === 'Creating') {
+    navigate('/creating', { replace: true });
+    return null;
+  }
+
+  // Redirect to setup if setupStatus isn't finished
+  if (!isLoading && (!settings || settings.setupStatus !== 'Finished')) {
     navigate('/setup', { replace: true });
     return null;
   }
