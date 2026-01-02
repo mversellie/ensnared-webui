@@ -87,6 +87,18 @@ export const ConceptsSetup = () => {
     setIsSubmitting(true);
     
     try {
+      // Save concepts to /conceptuals endpoint
+      const conceptsPayload: ConceptListResponse = {
+        concepts: (data.concepts || []).map(name => ({
+          id: null,
+          name,
+          type: null,
+          is_custom: true,
+          description: null,
+        })),
+      };
+      await apiRequest('/conceptuals', { method: 'POST', body: JSON.stringify(conceptsPayload) });
+
       // Collect all setup data from localStorage
       const setupData = {
         networkTitle: localStorage.getItem('setup_networkTitle') || '',
