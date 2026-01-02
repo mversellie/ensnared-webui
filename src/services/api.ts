@@ -20,11 +20,12 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  // Normalize URL: avoid duplicate slashes and trailing slash before query params
+  // Normalize URL: prepend /api/ and avoid duplicate slashes
   const base = getApiBaseUrl().replace(/\/+$/, '');
   const [rawPath = '', query] = endpoint.split('?');
-  // Ensure single leading slash; keep trailing slash only when no query string
-  const path = `/${rawPath.replace(/^\/+/, '')}`;
+  // Ensure path starts with /api/
+  const cleanPath = rawPath.replace(/^\/+/, '');
+  const path = `/api/${cleanPath}`;
   const url = query ? `${base}${path.replace(/\/+$/, '')}?${query}` : `${base}${path}`;
 
   const response = await fetch(url, {
