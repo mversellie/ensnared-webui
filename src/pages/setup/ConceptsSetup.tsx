@@ -99,6 +99,12 @@ export const ConceptsSetup = () => {
       };
       await apiRequest('/conceptuals', { method: 'POST', body: JSON.stringify(conceptsPayload) });
 
+      // Start setup process
+      await apiRequest('/setup/start', { 
+        method: 'POST', 
+        body: JSON.stringify({ skip_generate_concepts: true }) 
+      });
+
       // Collect all setup data from localStorage
       const setupData = {
         networkTitle: localStorage.getItem('setup_networkTitle') || '',
@@ -116,7 +122,7 @@ export const ConceptsSetup = () => {
       // Send to /settings endpoint using settingsService
       const result = await settingsService.saveSettings({
         ...setupData,
-        setupStatus: 'Finished',
+        setupStatus: 'Creating',
       });
       console.log("Setup completed successfully:", result);
 
