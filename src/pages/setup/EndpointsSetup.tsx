@@ -242,7 +242,7 @@ export const EndpointsSetup = () => {
         await settingsService.saveSettings(payload);
       }
       await settingsService.saveSettings({
-        setupStatus: "EndpointsConfigured",
+        setupStatus: "Endpoints Configured",
       });
       navigate("/setup/content");
     } catch (error) {
