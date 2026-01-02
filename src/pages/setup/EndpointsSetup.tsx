@@ -14,9 +14,9 @@ import { AlertCircle } from "lucide-react";
 
 const endpointsSchema = z.object({
   // Messenger (RabbitMQ)
-  rabbitHost: z.string().optional(),
-  rabbitPort: z.coerce.number().min(1).max(65535).optional(),
-  rabbitQueue: z.string().optional(),
+  rabbitMqHost: z.string().optional(),
+  rabbitMqPort: z.coerce.number().min(1).max(65535).optional(),
+  rabbitMqQueue: z.string().optional(),
   // OpenSearch
   openSearchHost: z.string().optional(),
   openSearchPort: z.coerce.number().min(1).max(65535).optional(),
@@ -29,9 +29,9 @@ const endpointsSchema = z.object({
 });
 
 const DEFAULTS = {
-  rabbitHost: '',
-  rabbitPort: 5672,
-  rabbitQueue: '',
+  rabbitMqHost: '',
+  rabbitMqPort: 5672,
+  rabbitMqQueue: '',
   openSearchHost: '',
   openSearchPort: 9200,
   openSearchUser: '',
@@ -71,9 +71,9 @@ export const EndpointsSetup = () => {
     resolver: zodResolver(endpointsSchema),
     mode: 'onChange',
     defaultValues: {
-      rabbitHost: cachedSettings?.rabbitHost || '',
-      rabbitPort: cachedSettings?.rabbitPort ?? undefined,
-      rabbitQueue: cachedSettings?.rabbitQueue || '',
+      rabbitMqHost: cachedSettings?.rabbitMqHost || '',
+      rabbitMqPort: cachedSettings?.rabbitMqPort ?? undefined,
+      rabbitMqQueue: cachedSettings?.rabbitMqQueue || '',
       openSearchHost: cachedSettings?.openSearchHost || '',
       openSearchPort: cachedSettings?.openSearchPort ?? undefined,
       openSearchUser: cachedSettings?.openSearchUser || '',
@@ -104,9 +104,9 @@ export const EndpointsSetup = () => {
 
   const getRabbitFingerprint = (values: EndpointsFormData) => {
     return JSON.stringify({
-      host: values.rabbitHost || DEFAULTS.rabbitHost,
-      port: values.rabbitPort || DEFAULTS.rabbitPort,
-      queue: values.rabbitQueue || DEFAULTS.rabbitQueue,
+      host: values.rabbitMqHost || DEFAULTS.rabbitMqHost,
+      port: values.rabbitMqPort || DEFAULTS.rabbitMqPort,
+      queue: values.rabbitMqQueue || DEFAULTS.rabbitMqQueue,
     });
   };
 
@@ -133,9 +133,9 @@ export const EndpointsSetup = () => {
       const response = await apiRequest('/configuration/test_rabbit', {
         method: 'POST',
         body: JSON.stringify({
-          rabbit_host: values.rabbitHost || DEFAULTS.rabbitHost,
-          port: values.rabbitPort || DEFAULTS.rabbitPort,
-          rabbit_queue: values.rabbitQueue || DEFAULTS.rabbitQueue,
+          rabbit_host: values.rabbitMqHost || DEFAULTS.rabbitMqHost,
+          port: values.rabbitMqPort || DEFAULTS.rabbitMqPort,
+          rabbit_queue: values.rabbitMqQueue || DEFAULTS.rabbitMqQueue,
         }),
       }) as { succeeded?: boolean };
       const succeeded = response?.succeeded === true;
@@ -246,9 +246,9 @@ export const EndpointsSetup = () => {
 
       // All tests passed - save settings
       const payload: Record<string, any> = {};
-      if (data.rabbitHost && data.rabbitHost !== DEFAULTS.rabbitHost) payload.rabbitHost = data.rabbitHost;
-      if (data.rabbitPort && data.rabbitPort !== DEFAULTS.rabbitPort) payload.rabbitPort = data.rabbitPort;
-      if (data.rabbitQueue && data.rabbitQueue !== DEFAULTS.rabbitQueue) payload.rabbitQueue = data.rabbitQueue;
+      if (data.rabbitMqHost && data.rabbitMqHost !== DEFAULTS.rabbitMqHost) payload.rabbitMqHost = data.rabbitMqHost;
+      if (data.rabbitMqPort && data.rabbitMqPort !== DEFAULTS.rabbitMqPort) payload.rabbitMqPort = data.rabbitMqPort;
+      if (data.rabbitMqQueue && data.rabbitMqQueue !== DEFAULTS.rabbitMqQueue) payload.rabbitMqQueue = data.rabbitMqQueue;
       if (data.openSearchHost && data.openSearchHost !== DEFAULTS.openSearchHost) payload.openSearchHost = data.openSearchHost;
       if (data.openSearchPort && data.openSearchPort !== DEFAULTS.openSearchPort) payload.openSearchPort = data.openSearchPort;
       if (data.openSearchUser && data.openSearchUser !== DEFAULTS.openSearchUser) payload.openSearchUser = data.openSearchUser;
@@ -321,40 +321,40 @@ export const EndpointsSetup = () => {
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="rabbitHost">RabbitMQ Host</Label>
+                <Label htmlFor="rabbitMqHost">RabbitMQ Host</Label>
                 <Input
-                  id="rabbitHost"
+                  id="rabbitMqHost"
                   placeholder="localhost"
-                  {...register("rabbitHost")}
+                  {...register("rabbitMqHost")}
                 />
-                {errors.rabbitHost && (
-                  <p className="text-sm text-destructive">{errors.rabbitHost.message}</p>
+                {errors.rabbitMqHost && (
+                  <p className="text-sm text-destructive">{errors.rabbitMqHost.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="rabbitPort">RabbitMQ Port</Label>
+                <Label htmlFor="rabbitMqPort">RabbitMQ Port</Label>
                 <Input
-                  id="rabbitPort"
+                  id="rabbitMqPort"
                   type="number"
                   placeholder="5672"
                   className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  {...register("rabbitPort")}
+                  {...register("rabbitMqPort")}
                 />
-                {errors.rabbitPort && (
-                  <p className="text-sm text-destructive">{errors.rabbitPort.message}</p>
+                {errors.rabbitMqPort && (
+                  <p className="text-sm text-destructive">{errors.rabbitMqPort.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="rabbitQueue">RabbitMQ Queue</Label>
+                <Label htmlFor="rabbitMqQueue">RabbitMQ Queue</Label>
                 <Input
-                  id="rabbitQueue"
+                  id="rabbitMqQueue"
                   placeholder="my_queue"
-                  {...register("rabbitQueue")}
+                  {...register("rabbitMqQueue")}
                 />
-                {errors.rabbitQueue && (
-                  <p className="text-sm text-destructive">{errors.rabbitQueue.message}</p>
+                {errors.rabbitMqQueue && (
+                  <p className="text-sm text-destructive">{errors.rabbitMqQueue.message}</p>
                 )}
               </div>
             </div>
