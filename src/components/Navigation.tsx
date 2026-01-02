@@ -40,12 +40,6 @@ export const Navigation = ({ onNavigate, activeSection = "home" }: NavigationPro
               >
                 Ensnare
               </h1>
-              <a 
-                href="/setup" 
-                className="text-sm text-muted-foreground hover:text-foreground underline"
-              >
-                Setup (Test)
-              </a>
             </div>
             
             <div className="flex items-center gap-2">
