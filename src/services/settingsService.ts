@@ -11,8 +11,11 @@ let memoryCache: Record<string, any> | null = null;
 
 export const settingsService = {
   async getSettings(): Promise<Record<string, any>> {
-    // Return memory cache if available
+    // Return memory cache if available, but refresh progress in the background
     if (memoryCache) {
+      void this.refreshSettings().catch(() => {
+        // ignore background refresh errors
+      });
       return memoryCache;
     }
 
@@ -22,6 +25,12 @@ export const settingsService = {
       try {
         const parsed: CachedSettings = JSON.parse(cached);
         memoryCache = parsed.data;
+
+        // Always refresh in the background so setupStatus stays current
+        void this.refreshSettings().catch(() => {
+          // ignore background refresh errors
+        });
+
         return memoryCache;
       } catch {
         // Invalid cache, fetch fresh
