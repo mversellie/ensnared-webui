@@ -1,5 +1,5 @@
 // Base API configuration
-const DEFAULT_API_URL = 'http://localhost:8000';
+const DEFAULT_API_URL = 'http://127.0.0.1:8000';
 const API_ENDPOINT_KEY = 'api_endpoint';
 
 function getApiBaseUrl(): string {
