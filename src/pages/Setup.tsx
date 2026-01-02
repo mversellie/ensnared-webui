@@ -22,8 +22,8 @@ export const Setup = () => {
           case "ContentConfigured":
             navigate("/setup/concepts", { replace: true });
             break;
-          case "ConceptsConfigured":
-            navigate("/setup/custom-concepts", { replace: true });
+          case "Creating":
+            navigate("/", { replace: true });
             break;
           case "Finished":
             navigate("/", { replace: true });
