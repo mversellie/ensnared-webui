@@ -233,7 +233,6 @@ export const EndpointsSetup = () => {
       if (data.openSearchHost && data.openSearchHost !== DEFAULTS.openSearchHost) payload.openSearchHost = data.openSearchHost;
       if (data.openSearchPort && data.openSearchPort !== DEFAULTS.openSearchPort) payload.openSearchPort = data.openSearchPort;
       if (data.openSearchUser && data.openSearchUser !== DEFAULTS.openSearchUser) payload.openSearchUser = data.openSearchUser;
-      if (data.openSearchPassword && data.openSearchPassword !== DEFAULTS.openSearchPassword) payload.openSearchPassword = data.openSearchPassword;
       if (data.llmBaseUrl && data.llmBaseUrl !== DEFAULTS.llmBaseUrl) payload.llmBaseUrl = data.llmBaseUrl;
       if (data.llmModel && data.llmModel !== DEFAULTS.llmModel) payload.llmModel = data.llmModel;
 
@@ -244,12 +243,20 @@ export const EndpointsSetup = () => {
         savePromises.push(settingsService.saveSettings(payload));
       }
       
-      // Send API key to secrets endpoint
+      // Send secrets to secrets endpoint
+      const secrets: Record<string, string> = {};
+      if (data.openSearchPassword && data.openSearchPassword !== DEFAULTS.openSearchPassword) {
+        secrets.openSearchPassword = data.openSearchPassword;
+      }
       if (data.llmApiKey && data.llmApiKey !== DEFAULTS.llmApiKey) {
+        secrets.llmApiKey = data.llmApiKey;
+      }
+      
+      if (Object.keys(secrets).length > 0) {
         savePromises.push(
           apiRequest('/configuration/secrets', {
             method: 'PUT',
-            body: JSON.stringify({ llmApiKey: data.llmApiKey }),
+            body: JSON.stringify(secrets),
           })
         );
       }
