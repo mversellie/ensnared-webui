@@ -1,16 +1,20 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { settingsService } from "@/services";
+import { apiRequest } from "@/services/api";
 
 const Creating = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkStatus = async () => {
-      const settings = await settingsService.refreshSettings();
-      if (settings?.setupStatus === "Finished") {
-        navigate("/", { replace: true });
+      try {
+        const response = await apiRequest<{ status: string }>("setup/progress");
+        if (response?.status === "Finished") {
+          navigate("/", { replace: true });
+        }
+      } catch (error) {
+        console.error("Failed to check setup progress:", error);
       }
     };
 
