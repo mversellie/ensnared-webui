@@ -13,7 +13,7 @@ import { apiRequest } from "@/services/api";
 
 const contentSchema = z.object({
   writersNote: z.string().optional(),
-  worldSettings: z.string().optional(),
+  worldSettings: z.string().trim().min(1, { message: "World Settings is required" }),
 });
 
 type ContentFormData = z.infer<typeof contentSchema>;
