@@ -45,8 +45,8 @@ export const ContentSetup = () => {
   } = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
     defaultValues: {
-      writersNote: DEFAULT_WRITERS_NOTE,
-      worldSettings: DEFAULT_WORLD_SETTINGS,
+      writersNote: "",
+      worldSettings: "",
     },
   });
 
@@ -71,15 +71,15 @@ export const ContentSetup = () => {
         setOriginalWorldSettings(worldPrompts || "");
 
         reset({
-          writersNote: authorsNote || localStorage.getItem("setup_writersNote") || DEFAULT_WRITERS_NOTE,
-          worldSettings: worldPrompts || localStorage.getItem("setup_worldSettings") || DEFAULT_WORLD_SETTINGS,
+          writersNote: authorsNote || localStorage.getItem("setup_writersNote") || "",
+          worldSettings: worldPrompts || localStorage.getItem("setup_worldSettings") || "",
         });
       } catch (error) {
         console.error("Failed to fetch prompts:", error);
         // Fall back to localStorage
         reset({
-          writersNote: localStorage.getItem("setup_writersNote") || DEFAULT_WRITERS_NOTE,
-          worldSettings: localStorage.getItem("setup_worldSettings") || DEFAULT_WORLD_SETTINGS,
+          writersNote: localStorage.getItem("setup_writersNote") || "",
+          worldSettings: localStorage.getItem("setup_worldSettings") || "",
         });
       } finally {
         setIsLoading(false);
@@ -167,7 +167,7 @@ export const ContentSetup = () => {
               </p>
               <Textarea
                 id="writersNote"
-                placeholder="The story takes place in a medieval fantasy setting. Characters should speak formally and reference magic as commonplace..."
+                placeholder={DEFAULT_WRITERS_NOTE}
                 className={`min-h-[100px] ${hasApiWritersNote ? "border-green-500 bg-green-500/10" : ""}`}
                 {...register("writersNote")}
               />
@@ -183,7 +183,7 @@ export const ContentSetup = () => {
               </p>
               <Textarea
                 id="worldSettings"
-                placeholder="A magical realm where dragons soar through crystal skies and ancient wizards study in towering spires. The land is filled with mystical creatures, enchanted forests, and powerful artifacts waiting to be discovered..."
+                placeholder={DEFAULT_WORLD_SETTINGS}
                 className={`min-h-[120px] ${hasApiWorldSettings ? "border-green-500 bg-green-500/10" : ""}`}
                 {...register("worldSettings")}
               />
