@@ -31,11 +31,11 @@ const endpointsSchema = z.object({
 const DEFAULTS = {
   rabbitMqHost: '',
   rabbitMqPort: 5672,
-  rabbitMqQueue: '',
+  rabbitMqQueue: 'ensnare',
   openSearchHost: '',
   openSearchPort: 9200,
   openSearchUser: '',
-  openSearchPassword: '',
+  openSearchPassword: 'PasswordFishMaster123',
   LLMLocation: '',
   llmModel: '',
   llmApiKey: '',
@@ -412,9 +412,10 @@ export const EndpointsSetup = () => {
                 <Label htmlFor="openSearchPassword">OpenSearch Password</Label>
                 <Input
                   id="openSearchPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  {...register("openSearchPassword")}
+                  type="text"
+                  value="<default>"
+                  disabled
+                  className="bg-muted"
                 />
                 {errors.openSearchPassword && (
                   <p className="text-sm text-destructive">{errors.openSearchPassword.message}</p>
