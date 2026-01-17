@@ -412,10 +412,9 @@ export const EndpointsSetup = () => {
                 <Label htmlFor="openSearchPassword">OpenSearch Password</Label>
                 <Input
                   id="openSearchPassword"
-                  type="text"
-                  value="<default>"
-                  disabled
-                  className="bg-muted"
+                  type="password"
+                  placeholder="<default>"
+                  {...register("openSearchPassword")}
                 />
                 {errors.openSearchPassword && (
                   <p className="text-sm text-destructive">{errors.openSearchPassword.message}</p>
