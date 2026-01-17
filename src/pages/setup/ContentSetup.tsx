@@ -23,6 +23,10 @@ interface PromptTemplate {
   template: string;
 }
 
+const DEFAULT_WRITERS_NOTE = `The story takes place in a medieval fantasy setting. Characters should speak formally and reference magic as commonplace. Maintain a tone of wonder and adventure throughout all interactions.`;
+
+const DEFAULT_WORLD_SETTINGS = `A magical realm where dragons soar through crystal skies and ancient wizards study in towering spires. The land is filled with mystical creatures, enchanted forests, and powerful artifacts waiting to be discovered. Technology is minimal, replaced instead by arcane innovations and elemental manipulation.`;
+
 export const ContentSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -41,8 +45,8 @@ export const ContentSetup = () => {
   } = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
     defaultValues: {
-      writersNote: "",
-      worldSettings: "",
+      writersNote: DEFAULT_WRITERS_NOTE,
+      worldSettings: DEFAULT_WORLD_SETTINGS,
     },
   });
 
@@ -67,15 +71,15 @@ export const ContentSetup = () => {
         setOriginalWorldSettings(worldPrompts || "");
 
         reset({
-          writersNote: authorsNote || localStorage.getItem("setup_writersNote") || "",
-          worldSettings: worldPrompts || localStorage.getItem("setup_worldSettings") || "",
+          writersNote: authorsNote || localStorage.getItem("setup_writersNote") || DEFAULT_WRITERS_NOTE,
+          worldSettings: worldPrompts || localStorage.getItem("setup_worldSettings") || DEFAULT_WORLD_SETTINGS,
         });
       } catch (error) {
         console.error("Failed to fetch prompts:", error);
         // Fall back to localStorage
         reset({
-          writersNote: localStorage.getItem("setup_writersNote") || "",
-          worldSettings: localStorage.getItem("setup_worldSettings") || "",
+          writersNote: localStorage.getItem("setup_writersNote") || DEFAULT_WRITERS_NOTE,
+          worldSettings: localStorage.getItem("setup_worldSettings") || DEFAULT_WORLD_SETTINGS,
         });
       } finally {
         setIsLoading(false);
